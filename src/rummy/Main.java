@@ -7,11 +7,11 @@ import rummy.core.Card.Suit;
 import rummy.core.Deck;
 import rummy.parts.PartsBuilder;
 
+// TODO: delete this, just used for playing around. Currently runs a simulation of a single computer
+// player drawing cards to form a winning hand.
 public class Main {
-  
+
   public static void main(String[] args) {
-    System.out.println("Hello World");  
-    
     Hand hand = new Hand(
         Card.build(Face.TWO, Suit.HEARTS),
         Card.build(Face.THREE, Suit.HEARTS),
@@ -27,21 +27,21 @@ public class Main {
         Card.build(Face.KING, Suit.SPADES),
         Card.build(Face.KING, Suit.CLUBS)
     );
-    
+
     System.out.println(hand);
     System.out.println(new PartsBuilder().buildParts(hand));
-    
+
     Computer comp = new Computer();
     Deck deck = new Deck();
     deck.shuffle();
     comp.drawNewHand(deck);
-    
+
     for (int i = 0; i < 100; i++) {
       if (deck.empty()) {
         System.out.println("DECK EXHAUSTED");
         break;
       }
-      
+
       System.out.println(i + ". hand:" + comp.hand + ", score:" + comp.currentHandScore);
       Card newCard = deck.draw();
       System.out.println("Stack:" + newCard);

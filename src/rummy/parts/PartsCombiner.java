@@ -20,6 +20,8 @@ import rummy.core.Card;
  */
 public class PartsCombiner {
 
+  private final int DEFAULT_HAND_SIZE = 13;
+
   // Map from BitIdx to a Part, eg 4 -> PartialRummy(2H,3H)
   private final Map<Integer, Part> bitIdxToPart;
   // Map from a Part to its BitIdx, eg PartialRummy(2H,3H) -> 4
@@ -31,11 +33,9 @@ public class PartsCombiner {
   // Eg PartialRummy(2H,3H) -> [1010]
   private final Map<Part, BitSet> partToBitSet;
 
-  PartsScorer scorer = new PartsScorer();
-
+  final PartsScorer scorer;
   List<Part> parts;
   final int handSize;
-  ArrayList<BitSet> bitMasks = new ArrayList<>();
 
   public static final Comparator<Part> COMPARE_BY_ORDINAL = new Comparator<Part>() {
     @Override
@@ -45,13 +45,15 @@ public class PartsCombiner {
     }
   };
 
-  public PartsCombiner(int handSize, List<Part> parts) {
+  // Allows for a different handSize just for testing purposes
+  PartsCombiner(int handSize, List<Part> parts) {
     bitIdxToPart = new HashMap<>();
     partToBitIdx = new HashMap<>();
     cardToBitSet = new HashMap<>();
     partToBitSet = new HashMap<>();
     this.parts = parts;
     this.handSize = handSize;
+    this.scorer = new PartsScorer();
 
     this.parts.sort(COMPARE_BY_ORDINAL);
     this.parts = pruneParts(parts);
@@ -85,14 +87,11 @@ public class PartsCombiner {
         bitSet.or(cardBitSet);
       }
       partToBitSet.put(part, bitSet);
-      //System.out.println(partToBitIdx.get(part) + ":" + part.cards.toString() + "->" + bitSet.toString());
     }
+  }
 
-    for (int i = 0; i < parts.size() + 1; i++) {
-      BitSet mask = new BitSet(parts.size());
-      mask.flip(i, parts.size());
-      bitMasks.add(mask);
-    }
+  public PartsCombiner(List<Part> parts) {
+    this(13, parts);
   }
 
   /**

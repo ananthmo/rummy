@@ -2,6 +2,10 @@ package rummy.core;
 
 import java.util.ArrayList;
 
+/**
+ * A hand is a holder of cards. Normally consists of 13 cards, and will have an additional card
+ * during the player's draw phase.
+ */
 public class Hand {
 
   public final ArrayList<Card> cards = new ArrayList<>();

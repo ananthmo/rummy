@@ -3,22 +3,28 @@ package rummy.parts;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Evaluates how good a set of parts is. Scores can be compared to construct the best hand.
+ */
 public class PartsScorer {
 
   private int scorePart(Part part) {
     switch (part.type) {
-    case NATURAL_RUMMY: return 1000;
-    case PARTIAL_RUMMY: return 100;
-    case PARTIAL_SET: return 75;
-    case RUMMY: return 300;
-    case SET: return 200;
-    case SINGLE: return -5;
-    default: throw new IllegalStateException("bad card");
+      case NATURAL_RUMMY: return 1000;
+      case PARTIAL_RUMMY: return 100;
+      case PARTIAL_SET: return 75;
+      case RUMMY: return 300;
+      case SET: return 200;
+      case SINGLE: return -5;
+      default: throw new IllegalStateException("bad card");
     }
   }
 
-  // TODO: weight second natural lower
-  // TODO: multiplier for single/partials
+  // TODO: possible improvements
+  // - weigh second natural lower
+  // - multiplier for single/partials
+  // - weigh Ace partial runs lower
+  // - weigh first part of 4 higher?
   public int scoreParts(Set<Part> parts) {
     int score = 0;
     for (Part part : parts) {

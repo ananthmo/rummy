@@ -12,14 +12,15 @@ import rummy.parts.PartsCombiner.Solution;
 import rummy.parts.PartsScorer;
 
 public class Computer {
-  
+
   Hand hand;
   int currentHandScore = -99999;
-  
+  final PartsScorer scorer;
+
   public Computer() {
-    hand = new Hand();
+    scorer = new PartsScorer();
   }
-  
+
   public void drawNewHand(Deck deck) {
     hand = new Hand();
     for (int i = 0; i < 13; i++) {
@@ -27,18 +28,14 @@ public class Computer {
     }
     currentHandScore = computeScore(hand).score;
   }
-  
+
   public boolean shouldPickup(Card card) {
-    PartsBuilder partsBuilder = new PartsBuilder();
-    List<Part> parts = partsBuilder.buildParts(hand);
     Hand newHand = new Hand(hand);
     hand.cards.add(card);
     int newScore = computeScore(newHand).score;
     return newScore > currentHandScore * 1.15;
   }
-  
-  PartsScorer scorer = new PartsScorer();
-  
+
   public Card drawAndDiscard(Card card) {
     hand.cards.add(card);
     Solution sol = computeScore(hand);
@@ -54,13 +51,12 @@ public class Computer {
     }
     return freeCard;
   }
-  
+
   public Solution computeScore(Hand hand) {
     PartsBuilder partsBuilder = new PartsBuilder();
     List<Part> parts = partsBuilder.buildParts(hand);
-    PartsCombiner combiner = new PartsCombiner(13, parts);
+    PartsCombiner combiner = new PartsCombiner(parts);
     Solution sol = combiner.combineParts();
     return sol;
   }
-
 }

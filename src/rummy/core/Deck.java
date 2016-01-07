@@ -8,15 +8,21 @@ import rummy.core.Card.Suit;
 
 public class Deck {
 
-  final Stack<Card> cards;
+  private static final int NUM_SHUFFLE_SWAPS = 1000;
 
+  private final Stack<Card> cards;
+
+  /**
+   * Constructs a deck of 52-cards, one card of each face/suit pair.
+   */
   public Deck() {
     this.cards = new Stack<>();
-    for (Suit suit : Suit.suits()) {
-      for (Face face: Face.faces()) {
+    for (Suit suit : Suit.SUITS) {
+      for (Face face: Face.FACES) {
         cards.add(new Card(face, suit));
       }
     }
+    // TODO: support jokers
     //cards.add(new Card(true));
     //cards.add(new Card(true));
   }
@@ -30,11 +36,10 @@ public class Deck {
   }
 
   public void shuffle() {
-    int numSwaps = 1000;
     int numCards = cards.size();
     Random rand = new Random();
 
-    for (int i = 0; i < numSwaps; i++) {
+    for (int i = 0; i < NUM_SHUFFLE_SWAPS; i++) {
       int c1idx = rand.nextInt(numCards);
       int c2idx = rand.nextInt(numCards);
       Card temp = cards.get(c1idx);

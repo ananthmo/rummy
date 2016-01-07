@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import rummy.core.Card;
 
+/** The possible ways of breaking down a rummy hand. */
 enum PartType {
   NATURAL_RUMMY, // Eg 3H-4H-5H
   RUMMY, // Eg 3H-Jk-5H

@@ -2,7 +2,12 @@ package rummy.core;
 
 import java.util.Objects;
 
+/**
+ * A card used in a hand of rummy. Its either a normal card with a face and suit, or a joker.
+ */
 public class Card {
+
+  /** The possible suits a card can be. */
   public enum Suit {
     HEARTS,
     DIAMONDS,
@@ -10,12 +15,10 @@ public class Card {
     CLUBS,
     JOKER;
 
-    public static Suit[] suits() {
-      Suit[] s = {HEARTS, DIAMONDS, SPADES, CLUBS};
-      return s;
-    }
+    static Suit[] SUITS = {HEARTS, DIAMONDS, SPADES, CLUBS};
   }
-  
+
+  /** The possible faces a card can be. */
   public enum Face {
     ACE(10),
     TWO(2),
@@ -31,19 +34,17 @@ public class Card {
     QUEEN(10),
     KING(10),
     JOKER(0);
-    
+
     final int points;
-    
+
     Face(int points) {
       this.points = points;
     }
-    
-    public static Face[] faces() {
-      Face[] s = {ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING};
-      return s;
-    }
+
+    static Face[] FACES =
+        {ACE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING};
   }
-  
+
   public final Face face;
   public final Suit suit;
   public final int value;
@@ -55,7 +56,7 @@ public class Card {
     this.value = suit.ordinal() * 13 + face.ordinal();
     this.joker = false;
   }
-  
+
   public Card(boolean joker) {
     this.joker = true;
     this.face = null;
