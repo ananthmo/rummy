@@ -19,7 +19,7 @@ import rummy.parts.PartsCombiner.Solution;
 public class PartsBuilderTest {
 
   @Test
-  @Ignore
+  //@Ignore
   public void testFullHand() {
     Hand hand = new Hand(
       Card.build(Face.TWO, Suit.HEARTS),
@@ -129,8 +129,9 @@ public class PartsBuilderTest {
     System.out.println("solution:" + solution.parts);
     System.out.println(solution.score);
   }
-  
+
   @Test
+  @Ignore
   public void testWinCheckWithJokers() {
     // 7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk2 10♦ 10♣ jk1
     System.out.println("win check");

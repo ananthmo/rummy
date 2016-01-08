@@ -48,14 +48,14 @@ public class PartsCombiner {
 
   // Allows for a different handSize just for testing purposes
   PartsCombiner(int handSize, List<Part> parts, boolean extraCard) {
-    bitIdxToPart = new HashMap<>();
-    partToBitIdx = new HashMap<>();
-    cardToBitSet = new HashMap<>();
-    partToBitSet = new HashMap<>();
     this.parts = parts;
     this.handSize = handSize;
-    this.scorer = new PartsScorer();
     this.extraCard = extraCard;
+    this.scorer = new PartsScorer();
+    this.bitIdxToPart = new HashMap<>();
+    this.partToBitIdx = new HashMap<>();
+    this.cardToBitSet = new HashMap<>();
+    this.partToBitSet = new HashMap<>();
 
     this.parts.sort(COMPARE_BY_ORDINAL);
     this.parts = pruneParts(parts);

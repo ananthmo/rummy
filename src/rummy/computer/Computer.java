@@ -1,4 +1,4 @@
-package rummy;
+package rummy.computer;
 
 import java.util.List;
 

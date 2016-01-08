@@ -1,4 +1,4 @@
-package rummy;
+package rummy.computer;
 
 import rummy.core.Card;
 import rummy.core.Hand;
@@ -7,9 +7,10 @@ import rummy.core.Card.Suit;
 import rummy.core.Deck;
 import rummy.parts.PartsBuilder;
 
-// TODO: delete this, just used for playing around. Currently runs a simulation of a single computer
-// player drawing cards to form a winning hand.
-public class Main {
+/**
+ * Runs a simulation of a single computer player drawing cards to try and form a winning hand.
+ */
+public class SingleSimulationMain {
 
   public static void main(String[] args) {
     Hand hand = new Hand(
