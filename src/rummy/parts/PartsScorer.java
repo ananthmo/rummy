@@ -1,13 +1,14 @@
 package rummy.parts;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 /**
  * Evaluates how good a set of parts is. Scores can be compared to construct the best hand.
  */
 public class PartsScorer {
+
+  public static final int WIN_SCORE = 1_000_000;
 
   private int scorePart(Part part) {
     switch (part.type) {

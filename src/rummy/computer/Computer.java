@@ -11,11 +11,16 @@ import rummy.parts.PartsCombiner;
 import rummy.parts.PartsCombiner.Solution;
 import rummy.parts.PartsScorer;
 
+/**
+ * Represents a AI-controller player (eg computer or bot), than uses a back-tracking algorithm
+ * to decide whether to draw a card from the stack and which to discard.
+ */
 public class Computer {
+
+  final PartsScorer scorer;
 
   Hand hand;
   int currentHandScore = -99999;
-  final PartsScorer scorer;
 
   public Computer() {
     scorer = new PartsScorer();
@@ -41,7 +46,6 @@ public class Computer {
     Solution sol = computeScore(hand, true);
     currentHandScore = sol.score;
     Card freeCard = sol.freeCards.get(0);
-    //hand.cards.remove(freeCard);
     hand.cards.clear();
     for (Part part : sol.parts) {
       hand.cards.addAll(part.cards);
@@ -56,7 +60,7 @@ public class Computer {
     PartsBuilder partsBuilder = new PartsBuilder();
     List<Part> parts = partsBuilder.buildParts(hand);
     PartsCombiner combiner = new PartsCombiner(parts, extraCard);
-    Solution sol = combiner.combineParts();
+    Solution sol = combiner.findBestHand();
     return sol;
   }
 }

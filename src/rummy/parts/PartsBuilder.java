@@ -28,13 +28,11 @@ public class PartsBuilder {
     }
   };
 
-  // TODO: support jokers
-  private int numJokers = 0;
   List<Card> jokers = new ArrayList<>();
 
   // Tokenizes a hand of cards into a list of Parts (eg Rummys, Sets, partial sets, etc).
   public List<Part> buildParts(Hand hand) {
-    List<Card> cards = new ArrayList<>(removeJokers(hand.cards));
+    List<Card> cards = new ArrayList<>(registerAndRemoveJokers(hand.cards));
 
     List<Part> parts = new ArrayList<>();
     parts.addAll(findSingleParts(cards));
@@ -43,14 +41,13 @@ public class PartsBuilder {
     return parts;
   }
 
-  private List<Card> removeJokers(List<Card> cards) {
+  private List<Card> registerAndRemoveJokers(List<Card> cards) {
     List<Card> cardsNoJ = new ArrayList<>();
     for (Card card : cards) {
       if (!card.isJoker()) {
         cardsNoJ.add(card);
       } else {
         jokers.add(card);
-        numJokers++;
       }
     }
     return cardsNoJ;

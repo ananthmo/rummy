@@ -10,11 +10,11 @@ import rummy.core.Card;
 /** The possible ways of breaking down a rummy hand. */
 enum PartType {
   NATURAL_RUMMY, // Eg 3H-4H-5H
-  RUMMY, // Eg 3H-Jk-5H
-  SET, // Eg 4H-4C-4D, 4H-Jk-4D
-  PARTIAL_RUMMY, // Eg 4H-5H, 4H-Jk
-  PARTIAL_SET, // eg 4H-4D, 4H-Jk
-  SINGLE, // eg 4H
+  RUMMY,         // Eg 3H-4H-jk, 3H-4H-jk-jk
+  SET,           // Eg 4H-4C-4D, 4H-jk-4D
+  PARTIAL_RUMMY, // Eg 4H-5H,
+  PARTIAL_SET,   // Eg 4H-4D,
+  SINGLE,        // Eg 4H
 }
 
 /**
@@ -30,7 +30,6 @@ public class Part {
     this.type = type;
     this.cards = cards;
   }
-
 
   public String toString() {
     String result = "";

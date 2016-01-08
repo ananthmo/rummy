@@ -13,32 +13,31 @@ import java.util.Set;
 import rummy.core.Card;
 
 /**
- * Combines a list of part tokens (eg rummys, sets, partial rummys, single cards, etc) into a
- * hand that optimizes a cost function.  Goes through each possible combination of parts that forms
- * a valid hand, and chooses the one with best score. The algorithm favors memory over
- * running (eg computation) time, for mobile devices.
+ * Combines a list of part tokens (eg rummys, sets, partial rummys, single cards, etc) into a hand
+ * that optimizes a score function.  Goes through each possible combination of parts that forms a
+ * valid hand via backtracking. Applies various pruning mechanisms to lower the search space, at
+ * the cost of missing some (hopefully rare) optimal hand configurations.
  */
 public class PartsCombiner {
 
   private static final int DEFAULT_HAND_SIZE = 13;
 
-  // Map from BitIdx to a Part, eg 4 -> PartialRummy(2H,3H)
+  // See description of #initializeBitMaps() to see how these are used.
   private final Map<Integer, Part> bitIdxToPart;
-  // Map from a Part to its BitIdx, eg PartialRummy(2H,3H) -> 4
   private final Map<Part, Integer> partToBitIdx;
-  // Map from a Card to a BitSet, containing the BitIdxes of the Parts the card belongs to,
-  // Eg 2H -> [1000]
-  private final Map<Card, BitSet> cardToBitSet;
-  // Map from a Part to a BitSet, containing the BitIdxes of the Parts that each card belongs to
-  // Eg PartialRummy(2H,3H) -> [1010]
   private final Map<Part, BitSet> partToBitSet;
 
-  final PartsScorer scorer;
-  List<Part> parts;
-  final int handSize;
-  final boolean extraCard;
+  private final PartsScorer scorer;
+  private List<Part> parts;
+  private final int handSize;
+  private final boolean extraCard;
 
-  public static final Comparator<Part> COMPARE_BY_ORDINAL = new Comparator<Part>() {
+  // Helper variable allocated once rather than in the recursive search method, to prevent GC
+  // overhead.
+  private BitSet usedPartSet;
+  int searchIterations = 0;
+
+  private static final Comparator<Part> PARTS_BY_ORDINAL = new Comparator<Part>() {
     @Override
     public int compare(Part p1, Part p2) {
       // First enums to last enums
@@ -54,22 +53,46 @@ public class PartsCombiner {
     this.scorer = new PartsScorer();
     this.bitIdxToPart = new HashMap<>();
     this.partToBitIdx = new HashMap<>();
-    this.cardToBitSet = new HashMap<>();
     this.partToBitSet = new HashMap<>();
 
-    this.parts.sort(COMPARE_BY_ORDINAL);
-    this.parts = pruneParts(parts);
-    System.out.println(parts);
+    preparePartsForSearch();
+    initializeBitMaps();
+  }
 
-    // Create a BitIndex for each part
+  private void preparePartsForSearch() {
+    this.parts.sort(PARTS_BY_ORDINAL);
+    this.parts = pruneParts(parts);
+  }
+
+  // Create the various maps which will be used in the backtracking algorithm.
+  //
+  // Eg, suppose we have parts NatRummy[3H-4H-5H], Set[3H-3S-3C], Rummy[5H-jk-7H], Single[3H],
+  // Single[4H], Single[5H].  The follow map associations will be created:
+  // a.) BitIdxToPart contains a map of a bitIdx to a part (and partToBitIdx the reverse).
+  //   1 <-> NatRummy[3H-4H-5H]
+  //   2 <-> Set[3H-3S-3C]
+  //   3 <-> Rummy[5H-jk-7H]
+  //   4 <-> Single[3H]
+  //   5 <-> Single[4H]
+  //   6 <-> Single[5H]
+  // b.) PartToBitSet contains for each part, the BitIdxs of all parts containing the same cards.
+  //   NatRummy[3H-4H-5H] -> [1,2,3,4,5,6]
+  //   Set[3H-3S-3C] -> [1,2,4]
+  //   Rummy[5H-jk-7H] -> [1,3,6]
+  //   Single[3H] -> [1,2,4]
+  //   Single[4H] -> [1,5]
+  //   Single[5H] -> [1,3,6]
+  private void initializeBitMaps() {
+    // Register a BitIndex for each part
     int nextBitIdx = 1;
     for (Part part : parts) {
       bitIdxToPart.put(nextBitIdx, part);
       partToBitIdx.put(part, nextBitIdx);
-      nextBitIdx += 1;  
+      nextBitIdx += 1;
     }
 
-    // Create a BitSet for each card, indicating which parts it is used in.
+    // Create a helper BitSet for each card, indicating which parts it is used in.
+    Map<Card, BitSet> cardToBitSet = new HashMap<>();
     for (Part part : parts) {
       for (Card card : part.cards) {
         if (cardToBitSet.get(card) == null) {
@@ -127,7 +150,7 @@ public class PartsCombiner {
     return pruned;
   }
 
-  public Solution combineParts() {
+  public Solution findBestHand() {
     // Add all parts to set
     BitSet availableParts = new BitSet();
     Set<Card> allCards = new HashSet<>();
@@ -136,27 +159,23 @@ public class PartsCombiner {
       allCards.addAll(part.cards);
     }
 
-    // Find which parts to use
-    Set<Part> parts = new LinkedHashSet<>();
+    // Find which parts to use that optimizes the score
     Solution solution = new Solution();
-    search(availableParts, 0, parts, allCards, new LinkedHashSet<>(), solution);
+    search(
+        availableParts,
+        0 /* startBitIdx */,
+        new LinkedHashSet<>() /* running parts */,
+        allCards,
+        new LinkedHashSet<>() /* used cards */,
+        solution);
     return solution;
   }
 
-  public static class Solution {
-      public List<Part> parts = null;
-      public int score = -999999;
-      public List<Card> freeCards = null;
-      public boolean isWinning = false;
+  private int computeScore(Set<Part> parts) {
+    return scorer.scoreParts(parts) + (scorer.isWinning(parts) ? PartsScorer.WIN_SCORE : 0);
   }
 
-  int computeScore(Set<Part> parts) {
-    return scorer.scoreParts(parts) + (scorer.isWinning(parts) ? 10000000 : 0);
-  }
-
-  int count = 0;
-  BitSet usedPartSet;
-  void search(
+  private void search(
       BitSet availableParts,
       int startIdx,
       Set<Part> parts,
@@ -168,7 +187,7 @@ public class PartsCombiner {
       return;
     }
 
-    count++;
+    searchIterations++;
     if (usedCards.size() == handSize && availableCards.size() == (extraCard ? 1 : 0)) {
       // Found a solution, record it if its the best one so far
       int score = computeScore(parts);
@@ -176,7 +195,7 @@ public class PartsCombiner {
         solution.parts = new ArrayList<Part>(parts);
         solution.score = score;
         solution.freeCards = new ArrayList<Card>(availableCards);
-        if (score > 100000) {
+        if (score >= PartsScorer.WIN_SCORE) {
           solution.isWinning = true;
         }
       }
@@ -188,38 +207,49 @@ public class PartsCombiner {
       return;
     }
 
-    // Each up on GC by reusing these variables throughout the loop search.
     BitSet original = new BitSet();
     original.or(availableParts);
-    Part part;
+    Part nextPart;
     for (int bitIdx = availableParts.nextSetBit(startIdx);
         bitIdx >= 0;
         bitIdx = availableParts.nextSetBit(bitIdx+1)) {
-      // Use this part to form a hand
-      part = bitIdxToPart.get(bitIdx);
+      // Get the next available part to use for forming a hand
+      nextPart = bitIdxToPart.get(bitIdx);
 
-      // No use in continuing if first part is a single, there must be a better hand previously.
-      if (part.type == PartType.SINGLE && parts.size() == 0) {
+      // No use in continuing if first/second part is a single, there must be a better hand
+      // previously.
+      if (nextPart.type == PartType.SINGLE && parts.size() <= 1) {
         return;
       }
 
-      // Mark which parts are no longer available for use
-      usedPartSet = partToBitSet.get(part);
-      parts.add(part);
-      availableCards.removeAll(part.cards);
-      usedCards.addAll(part.cards);
+      // Use this part.
+      parts.add(nextPart);
+      usedCards.addAll(nextPart.cards);
 
-      // Clear the used bits
+      // Mark which other parts are no longer available for use, as their cards will overlap with
+      // the newly used part.
+      availableCards.removeAll(nextPart.cards);
+      usedPartSet = partToBitSet.get(nextPart);
       availableParts.andNot(usedPartSet);
 
       // Recursively search through remaining cards to form a hand
       search(availableParts, bitIdx + 1, parts, availableCards, usedCards, solution);
 
-      // Restore hand to original state.
+      // Restore hand to original state as if the part was not used.
       availableParts.or(original);
-      parts.remove(part);
-      usedCards.removeAll(part.cards);
-      availableCards.addAll(part.cards);
+      parts.remove(nextPart);
+      usedCards.removeAll(nextPart.cards);
+      availableCards.addAll(nextPart.cards);
     }
+  }
+
+  /**
+   * Holder for information about a particular set of parts that form a hand.
+   */
+  public static class Solution {
+    public List<Part> parts = null;
+    public int score = -999999;
+    public List<Card> freeCards = null;
+    public boolean isWinning = false;
   }
 }

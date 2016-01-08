@@ -43,11 +43,11 @@ public class PartsBuilderTest {
     assertTrue(parts.size() > 0);
 
     PartsCombiner combiner = new PartsCombiner(13, parts, true);
-    Solution solution = combiner.combineParts();
+    Solution solution = combiner.findBestHand();
     assertNotNull(solution.parts);
     System.out.println("solution");
     System.out.println(solution.parts);
-    System.out.println(combiner.count);
+    System.out.println(combiner.searchIterations);
   }
 
   @Test
@@ -84,7 +84,7 @@ public class PartsBuilderTest {
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
-    Solution solution = new PartsCombiner(7, parts, false).combineParts();
+    Solution solution = new PartsCombiner(7, parts, false).findBestHand();
     //assertNotNull(solution.parts);
     System.out.println("solution");
     System.out.println(solution.parts);
@@ -97,7 +97,7 @@ public class PartsBuilderTest {
     System.out.println("hand:" + hand.cards);
     List<Part> parts = new PartsBuilder().buildParts(hand);
     assertTrue(parts.size() > 0);
-    Solution solution = new PartsCombiner(parts, false).combineParts();
+    Solution solution = new PartsCombiner(parts, false).findBestHand();
     //assertNotNull(solution.parts);
     System.out.println("solution:" + solution.parts);
   }
@@ -110,7 +110,7 @@ public class PartsBuilderTest {
     List<Part> parts = new PartsBuilder().buildParts(hand);
     assertTrue(parts.size() > 0);
     System.out.println(parts);
-    Solution solution = new PartsCombiner(parts, true).combineParts();
+    Solution solution = new PartsCombiner(parts, true).findBestHand();
     //assertNotNull(solution.parts);
     System.out.println("solution:" + solution.parts);
     System.out.println(solution.score);
@@ -124,7 +124,7 @@ public class PartsBuilderTest {
     List<Part> parts = new PartsBuilder().buildParts(hand);
     assertTrue(parts.size() > 0);
     System.out.println(parts);
-    Solution solution = new PartsCombiner(parts, true).combineParts();
+    Solution solution = new PartsCombiner(parts, true).findBestHand();
     //assertNotNull(solution.parts);
     System.out.println("solution:" + solution.parts);
     System.out.println(solution.score);
@@ -137,7 +137,7 @@ public class PartsBuilderTest {
     System.out.println("win check");
     Hand hand = toHand("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H");
     List<Part> parts = new PartsBuilder().buildParts(hand);
-    Solution solution = new PartsCombiner(parts, true).combineParts();
+    Solution solution = new PartsCombiner(parts, true).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.isWinning);
   }
