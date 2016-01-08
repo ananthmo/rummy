@@ -1,5 +1,6 @@
 package rummy.parts;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -11,11 +12,11 @@ public class PartsScorer {
   private int scorePart(Part part) {
     switch (part.type) {
       case NATURAL_RUMMY: return 1000;
-      case PARTIAL_RUMMY: return 100;
-      case PARTIAL_SET: return 75;
+      case PARTIAL_RUMMY: return 75;
+      case PARTIAL_SET: return 50;
       case RUMMY: return 300;
       case SET: return 200;
-      case SINGLE: return -5;
+      case SINGLE: return part.cards.get(0).isJoker() ? 105 : -5;
       default: throw new IllegalStateException("bad card");
     }
   }
@@ -35,7 +36,7 @@ public class PartsScorer {
 
   // This is a winning 13-card hand if it contains a natural rummy, a rummy, and remaining cards
   // are rummys or sets.
-  public boolean isWinning(List<Part> parts) {
+  public boolean isWinning(Collection<Part> parts) {
     boolean natural = false;
     boolean rummy = false;
     boolean allSetsOrRuns = true;

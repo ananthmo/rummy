@@ -20,7 +20,7 @@ import rummy.core.Card;
  */
 public class PartsCombiner {
 
-  private final int DEFAULT_HAND_SIZE = 13;
+  private static final int DEFAULT_HAND_SIZE = 13;
 
   // Map from BitIdx to a Part, eg 4 -> PartialRummy(2H,3H)
   private final Map<Integer, Part> bitIdxToPart;
@@ -36,6 +36,7 @@ public class PartsCombiner {
   final PartsScorer scorer;
   List<Part> parts;
   final int handSize;
+  final boolean extraCard;
 
   public static final Comparator<Part> COMPARE_BY_ORDINAL = new Comparator<Part>() {
     @Override
@@ -46,7 +47,7 @@ public class PartsCombiner {
   };
 
   // Allows for a different handSize just for testing purposes
-  PartsCombiner(int handSize, List<Part> parts) {
+  PartsCombiner(int handSize, List<Part> parts, boolean extraCard) {
     bitIdxToPart = new HashMap<>();
     partToBitIdx = new HashMap<>();
     cardToBitSet = new HashMap<>();
@@ -54,10 +55,11 @@ public class PartsCombiner {
     this.parts = parts;
     this.handSize = handSize;
     this.scorer = new PartsScorer();
+    this.extraCard = extraCard;
 
     this.parts.sort(COMPARE_BY_ORDINAL);
     this.parts = pruneParts(parts);
-    //System.out.println(parts);
+    System.out.println(parts);
 
     // Create a BitIndex for each part
     int nextBitIdx = 1;
@@ -87,11 +89,12 @@ public class PartsCombiner {
         bitSet.or(cardBitSet);
       }
       partToBitSet.put(part, bitSet);
+      //System.out.println(partToBitIdx.get(part) + " ->" + part + " : " + partToBitSet.get(part));
     }
   }
 
-  public PartsCombiner(List<Part> parts) {
-    this(13, parts);
+  public PartsCombiner(List<Part> parts, boolean extraCard) {
+    this(DEFAULT_HAND_SIZE, parts, extraCard);
   }
 
   /**
@@ -106,10 +109,10 @@ public class PartsCombiner {
     for (Part part : parts) {
       boolean skip = false;
       if (part.type == PartType.NATURAL_RUMMY) {
-        if (part.cards.size() == 3) {
+        if (part.cards.size() == 3 && blackListed.size() <= 3) {
           blackListed.addAll(part.cards);
         }
-      } else {
+      } else if (part.type != PartType.RUMMY) {
         for (Card card : part.cards) {
           if (blackListed.contains(card)) {
             skip = true;
@@ -144,10 +147,11 @@ public class PartsCombiner {
       public List<Part> parts = null;
       public int score = -999999;
       public List<Card> freeCards = null;
+      public boolean isWinning = false;
   }
 
   int computeScore(Set<Part> parts) {
-    return scorer.scoreParts(parts);
+    return scorer.scoreParts(parts) + (scorer.isWinning(parts) ? 10000000 : 0);
   }
 
   int count = 0;
@@ -159,15 +163,22 @@ public class PartsCombiner {
       Set<Card> availableCards,
       Set<Card> usedCards,
       Solution solution) {
-    //System.out.println(parts + ", " + availableParts);
+    if (solution.isWinning) {
+      // Found a solution, end the search.
+      return;
+    }
+
     count++;
-    if (usedCards.size() == handSize && availableCards.size() == 1) {
+    if (usedCards.size() == handSize && availableCards.size() == (extraCard ? 1 : 0)) {
       // Found a solution, record it if its the best one so far
       int score = computeScore(parts);
       if (score > solution.score) {
         solution.parts = new ArrayList<Part>(parts);
         solution.score = score;
         solution.freeCards = new ArrayList<Card>(availableCards);
+        if (score > 100000) {
+          solution.isWinning = true;
+        }
       }
       return;
     }
@@ -179,16 +190,21 @@ public class PartsCombiner {
 
     // Each up on GC by reusing these variables throughout the loop search.
     BitSet original = new BitSet();
-      original.or(availableParts);
+    original.or(availableParts);
     Part part;
     for (int bitIdx = availableParts.nextSetBit(startIdx);
         bitIdx >= 0;
-        bitIdx = availableParts.nextSetBit(bitIdx+1)) {      
+        bitIdx = availableParts.nextSetBit(bitIdx+1)) {
       // Use this part to form a hand
-            part = bitIdxToPart.get(bitIdx);
+      part = bitIdxToPart.get(bitIdx);
+
+      // No use in continuing if first part is a single, there must be a better hand previously.
+      if (part.type == PartType.SINGLE && parts.size() == 0) {
+        return;
+      }
 
       // Mark which parts are no longer available for use
-            usedPartSet = partToBitSet.get(part);      
+      usedPartSet = partToBitSet.get(part);
       parts.add(part);
       availableCards.removeAll(part.cards);
       usedCards.addAll(part.cards);

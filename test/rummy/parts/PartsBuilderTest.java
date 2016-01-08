@@ -42,7 +42,7 @@ public class PartsBuilderTest {
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
-    PartsCombiner combiner = new PartsCombiner(13, parts);
+    PartsCombiner combiner = new PartsCombiner(13, parts, true);
     Solution solution = combiner.combineParts();
     assertNotNull(solution.parts);
     System.out.println("solution");
@@ -84,33 +84,81 @@ public class PartsBuilderTest {
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
-    Solution solution = new PartsCombiner(7, parts).combineParts();
+    Solution solution = new PartsCombiner(7, parts, false).combineParts();
     //assertNotNull(solution.parts);
     System.out.println("solution");
     System.out.println(solution.parts);
   }
 
   @Test
+  @Ignore
   public void testOptimalMidHand() {
     Hand hand = toHand("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H");
+    System.out.println("hand:" + hand.cards);
     List<Part> parts = new PartsBuilder().buildParts(hand);
-    Solution solution = new PartsCombiner(13, parts).combineParts();
-    assertNotNull(solution.parts);
-    System.out.println("solution:" + solution.parts);    
+    assertTrue(parts.size() > 0);
+    Solution solution = new PartsCombiner(parts, false).combineParts();
+    //assertNotNull(solution.parts);
+    System.out.println("solution:" + solution.parts);
   }
 
-  static Hand toHand(String in) {
+  @Test
+  @Ignore
+  public void testJokerHand() {
+    Hand hand = toHand("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS");
+    System.out.println("hand:" + hand.cards);
+    List<Part> parts = new PartsBuilder().buildParts(hand);
+    assertTrue(parts.size() > 0);
+    System.out.println(parts);
+    Solution solution = new PartsCombiner(parts, true).combineParts();
+    //assertNotNull(solution.parts);
+    System.out.println("solution:" + solution.parts);
+    System.out.println(solution.score);
+  }
+
+  @Test
+  @Ignore
+  public void testRun() {
+    Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
+    System.out.println("hand:" + hand.cards);
+    List<Part> parts = new PartsBuilder().buildParts(hand);
+    assertTrue(parts.size() > 0);
+    System.out.println(parts);
+    Solution solution = new PartsCombiner(parts, true).combineParts();
+    //assertNotNull(solution.parts);
+    System.out.println("solution:" + solution.parts);
+    System.out.println(solution.score);
+  }
+  
+  @Test
+  public void testWinCheckWithJokers() {
+    // 7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk2 10♦ 10♣ jk1
+    System.out.println("win check");
+    Hand hand = toHand("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H");
+    List<Part> parts = new PartsBuilder().buildParts(hand);
+    Solution solution = new PartsCombiner(parts, true).combineParts();
+    System.out.println(solution.parts);
+    assertTrue(solution.isWinning);
+  }
+
+  private static Hand toHand(String in) {
     Hand hand = new Hand();
+    int jkIdx = 1;
     for (String val : in.split(" ")) {
       char suitChar = val.charAt(val.length() - 1);
       String faceStr = val.substring(0, val.length() - 1);
 
+      if (val.equals("jk")) {
+        hand.cards.add(new Card(jkIdx++));
+        continue;
+      }
+
       Suit suit;
       switch (suitChar) {
-        case 'H': suit = Suit.HEARTS; break;
-        case 'S': suit = Suit.SPADES; break;
-        case 'D': suit = Suit.DIAMONDS; break;
-        case 'C': suit = Suit.CLUBS; break;
+        case 'H': case '♥': suit = Suit.HEARTS; break;
+        case 'S': case '♠': suit = Suit.SPADES; break;
+        case 'D': case '♦': suit = Suit.DIAMONDS; break;
+        case 'C': case '♣': suit = Suit.CLUBS; break;
         default: throw new IllegalArgumentException("bad hand string");
       }
 

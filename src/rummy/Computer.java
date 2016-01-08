@@ -26,19 +26,19 @@ public class Computer {
     for (int i = 0; i < 13; i++) {
       hand.cards.add(deck.draw());
     }
-    currentHandScore = computeScore(hand).score;
+    currentHandScore = computeScore(hand, false).score;
   }
 
   public boolean shouldPickup(Card card) {
     Hand newHand = new Hand(hand);
     hand.cards.add(card);
-    int newScore = computeScore(newHand).score;
+    int newScore = computeScore(newHand, true).score;
     return newScore > currentHandScore * 1.15;
   }
 
   public Card drawAndDiscard(Card card) {
     hand.cards.add(card);
-    Solution sol = computeScore(hand);
+    Solution sol = computeScore(hand, true);
     currentHandScore = sol.score;
     Card freeCard = sol.freeCards.get(0);
     //hand.cards.remove(freeCard);
@@ -52,10 +52,10 @@ public class Computer {
     return freeCard;
   }
 
-  public Solution computeScore(Hand hand) {
+  public Solution computeScore(Hand hand, boolean extraCard) {
     PartsBuilder partsBuilder = new PartsBuilder();
     List<Part> parts = partsBuilder.buildParts(hand);
-    PartsCombiner combiner = new PartsCombiner(parts);
+    PartsCombiner combiner = new PartsCombiner(parts, extraCard);
     Solution sol = combiner.combineParts();
     return sol;
   }

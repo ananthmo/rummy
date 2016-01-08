@@ -31,6 +31,7 @@ public class Part {
     this.cards = cards;
   }
 
+
   public String toString() {
     String result = "";
     result += type.name() + ": " + cards.toString();
@@ -42,6 +43,12 @@ public class Part {
     return new Part(PartType.NATURAL_RUMMY, cardsCopy);
   }
 
+  public static Part rummyWithJoker(List<Card> cards, Card... jokers) {
+    ArrayList<Card> cardsCopy = new ArrayList<>(cards);
+    cardsCopy.addAll(Arrays.asList(jokers));
+    return new Part(PartType.RUMMY, cardsCopy);
+  }
+
   public static Part partialRummy(List<Card> cards) {
     ArrayList<Card> cardsCopy = new ArrayList<>(cards);
     return new Part(PartType.PARTIAL_RUMMY, cardsCopy);
@@ -49,6 +56,12 @@ public class Part {
 
   public static Part set(List<Card> cards) {
     ArrayList<Card> cardsCopy = new ArrayList<>(cards);
+    return new Part(PartType.SET, cardsCopy);
+  }
+
+  public static Part setWithJoker(List<Card> cards, Card... jokers) {
+    ArrayList<Card> cardsCopy = new ArrayList<>(cards);
+    cardsCopy.addAll(Arrays.asList(jokers));
     return new Part(PartType.SET, cardsCopy);
   }
 

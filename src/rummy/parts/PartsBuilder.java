@@ -30,11 +30,11 @@ public class PartsBuilder {
 
   // TODO: support jokers
   private int numJokers = 0;
+  List<Card> jokers = new ArrayList<>();
 
   // Tokenizes a hand of cards into a list of Parts (eg Rummys, Sets, partial sets, etc).
   public List<Part> buildParts(Hand hand) {
     List<Card> cards = new ArrayList<>(removeJokers(hand.cards));
-
 
     List<Part> parts = new ArrayList<>();
     parts.addAll(findSingleParts(cards));
@@ -46,9 +46,10 @@ public class PartsBuilder {
   private List<Card> removeJokers(List<Card> cards) {
     List<Card> cardsNoJ = new ArrayList<>();
     for (Card card : cards) {
-      if (!card.joker) {
+      if (!card.isJoker()) {
         cardsNoJ.add(card);
       } else {
+        jokers.add(card);
         numJokers++;
       }
     }
@@ -72,6 +73,13 @@ public class PartsBuilder {
       Card card = cards.get(i);
       if (prev != null
           && (card.suit != prev.suit || card.face.ordinal() != prev.face.ordinal() + 1)) {
+        if (run.size() == 2 && jokers.size() > 0) {
+          parts.add(Part.rummyWithJoker(run, jokers.get(0)));
+          if (jokers.size() > 1) {
+            parts.add(Part.rummyWithJoker(run, jokers.get(0), jokers.get(1)));
+          }
+        }
+
         run.clear();
         if (card.suit != prev.suit) {
           qkaRun.clear();
@@ -82,13 +90,19 @@ public class PartsBuilder {
       if (card.face == Face.ACE || card.face == Face.KING || card.face == Face.QUEEN) {
         qkaRun.add(card);
         if (qkaRun.size() == 3) {
-          parts.add(Part.naturalRummy(qkaRun));  
+          parts.add(Part.naturalRummy(qkaRun));
         }
       }
 
       run.add(card);
       if (run.size() == 3 || run.size() == 4) {
         parts.add(Part.naturalRummy(run));
+        for (Card joker : jokers) {
+          parts.add(Part.rummyWithJoker(run, joker));
+        }
+        if (run.size() == 3 && jokers.size() == 2) {
+          parts.add(Part.rummyWithJoker(run, jokers.get(0), jokers.get(1)));
+        }
       } else if (run.size() == 2) { // Note: only adds the first 2 cards in the sequence
         parts.add(Part.partialRummy(run));
       }
@@ -107,6 +121,9 @@ public class PartsBuilder {
     for (Card card : cards) {
       parts.add(Part.single(card));
     }
+    for (Card joker : jokers) {
+      parts.add(Part.single(joker));
+    }
     return parts;
   }
 
@@ -123,17 +140,37 @@ public class PartsBuilder {
       Card card = cards.get(i);
 
       if (prev != null && card.face != prev.face) {
+        if (run.size() == 2 && jokers.size() > 0) {
+          for (Card joker : jokers) {
+            parts.add(Part.setWithJoker(run, joker));
+          }
+          if (jokers.size() > 1) {
+            parts.add(Part.setWithJoker(run, jokers.get(0), jokers.get(1)));
+          }
+        }
+
         run.clear();
       }
 
       run.add(card);
       if (run.size() == 3 || run.size() == 4) {
         parts.add(Part.set(run));
+        for (Card joker : jokers) {
+          parts.add(Part.setWithJoker(run, joker));
+        }
       } else if (run.size() == 2) { // Note: only adds first 2 cards of group
         parts.add(Part.partialSet(run));
       }
 
       prev = card;
+    }
+    if (run.size() == 2 && jokers.size() > 0) {
+      for (Card joker : jokers) {
+        parts.add(Part.setWithJoker(run, joker));
+      }
+      if (jokers.size() > 1) {
+        parts.add(Part.setWithJoker(run, jokers.get(0), jokers.get(1)));
+      }
     }
     return parts;
   }

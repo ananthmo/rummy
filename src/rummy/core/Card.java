@@ -48,25 +48,29 @@ public class Card {
   public final Face face;
   public final Suit suit;
   public final int value;
-  public final boolean joker;
+  public final int jokerIdx;
 
   public Card(Face face, Suit suit) {
     this.face = face;
     this.suit = suit;
     this.value = suit.ordinal() * 13 + face.ordinal();
-    this.joker = false;
+    this.jokerIdx = 0;
   }
 
-  public Card(boolean joker) {
-    this.joker = true;
+  public Card(int jokerIdx) {
+    this.jokerIdx = jokerIdx;
     this.face = null;
     this.suit = null;
     this.value = -1;
   }
 
+  public boolean isJoker() {
+    return jokerIdx > 0;
+  }
+
   public String toString() {
-    if (joker) {
-      return "Jk";
+    if (isJoker()) {
+      return "jk" + jokerIdx;
     }
 
     String result = "";
@@ -109,11 +113,11 @@ public class Card {
     return face == other.face
         && suit == other.suit
         && value == other.value
-        && joker == other.joker;
+        && jokerIdx == other.jokerIdx;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(face, suit, value, joker);
+    return Objects.hash(face, suit, value, jokerIdx);
   }
 }

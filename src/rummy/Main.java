@@ -32,7 +32,7 @@ public class Main {
     System.out.println(new PartsBuilder().buildParts(hand));
 
     Computer comp = new Computer();
-    Deck deck = new Deck();
+    Deck deck = new Deck(2);
     deck.shuffle();
     comp.drawNewHand(deck);
 
