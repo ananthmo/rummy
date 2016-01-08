@@ -2,7 +2,9 @@ package rummy.parts;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -51,7 +53,7 @@ public class PartsBuilderTest {
   }
 
   @Test
-  @Ignore
+  //@Ignore
   public void testQkaRun() {
     Hand hand = new Hand(
       Card.build(Face.QUEEN, Suit.HEARTS),
@@ -68,7 +70,7 @@ public class PartsBuilderTest {
   }
 
   @Test
-  @Ignore
+  //@Ignore
   public void testSparseHand() {
     Hand hand = new Hand(
       Card.build(Face.TWO, Suit.HEARTS),
@@ -91,33 +93,7 @@ public class PartsBuilderTest {
   }
 
   @Test
-  @Ignore
-  public void testOptimalMidHand() {
-    Hand hand = toHand("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H");
-    System.out.println("hand:" + hand.cards);
-    List<Part> parts = new PartsBuilder().buildParts(hand);
-    assertTrue(parts.size() > 0);
-    Solution solution = new PartsCombiner(parts, false).findBestHand();
-    //assertNotNull(solution.parts);
-    System.out.println("solution:" + solution.parts);
-  }
-
-  @Test
-  @Ignore
-  public void testJokerHand() {
-    Hand hand = toHand("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS");
-    System.out.println("hand:" + hand.cards);
-    List<Part> parts = new PartsBuilder().buildParts(hand);
-    assertTrue(parts.size() > 0);
-    System.out.println(parts);
-    Solution solution = new PartsCombiner(parts, true).findBestHand();
-    //assertNotNull(solution.parts);
-    System.out.println("solution:" + solution.parts);
-    System.out.println(solution.score);
-  }
-
-  @Test
-  @Ignore
+  //@Ignore
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
     System.out.println("hand:" + hand.cards);
@@ -131,25 +107,62 @@ public class PartsBuilderTest {
   }
 
   @Test
-  @Ignore
-  public void testWinCheckWithJokers() {
-    // 7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk2 10♦ 10♣ jk1
-    System.out.println("win check");
-    Hand hand = toHand("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H");
+  //@Ignore
+  public void testWinHands() {
+    // Standard hand
+    checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
+
+    // With jokers
+    checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
+
+    // Double joker
+    checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
+
+    // Need to insert joker in middle of run
+    // TODO: checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk 6H", true);
+
+    // Multiples of same card, with a run of 5. Need to debug why not passing.
+    // TODO: checkWin("A♥ 2♥ jk 2♥ 3♥ jk 3♥ 4♥ jk 4♥ 5♥ 5♥ 5♣ 9S", true);
+  }
+
+  @Test
+  //@Ignore
+  public void testSparseHands() {
+    checkSolution("J♣ 6♠ K♠ jk 2♠ jk 10♣ Q♠ 3♣ J♠ Q♦ 5♣ 8♠ 10S", true);
+    checkSolution("A♣ A♣ 3♠ 3♠ 5♠ 5♠ 7♣ 7♣ 9♣ 9♣ J♣ J♣ K♠ K♠", true);
+    checkSolution("A♣ 2♣ 3♣ 8♦ 9♦ jk5 Q♥ Q♦ Q♣ 10♥ 8♠ 10♥ A♦ KC", true);
+  }
+
+  private static void checkWin(String in, boolean extraCard) {
+    System.out.println("checkWin");
+    Hand hand = toHand(in);
     List<Part> parts = new PartsBuilder().buildParts(hand);
-    Solution solution = new PartsCombiner(parts, true).findBestHand();
+    System.out.println(parts);
+    Solution solution = new PartsCombiner(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.isWinning);
+  }
+
+  private static void checkSolution(String in, boolean extraCard) {
+    System.out.println("checkSolution");
+    Hand hand = toHand(in);
+    List<Part> parts = new PartsBuilder().buildParts(hand);
+    System.out.println(parts);
+    Solution solution = new PartsCombiner(parts, extraCard).findBestHand();
+    System.out.println(solution.parts);
+    assertTrue(solution.score > -100);
+    assertTrue(solution.freeCards.size() == 1);
   }
 
   private static Hand toHand(String in) {
     Hand hand = new Hand();
     int jkIdx = 1;
+    Map<Integer, Integer> cardCount = new HashMap<>();
     for (String val : in.split(" ")) {
       char suitChar = val.charAt(val.length() - 1);
       String faceStr = val.substring(0, val.length() - 1);
 
-      if (val.equals("jk")) {
+      if (val.startsWith("jk")) {
         hand.cards.add(new Card(jkIdx++));
         continue;
       }
@@ -181,7 +194,14 @@ public class PartsBuilderTest {
         default: throw new IllegalArgumentException("bad hand string");
       }
 
-      hand.cards.add(new Card(face, suit));
+      int value = (new Card(face, suit, 0)).value;
+      if (cardCount.get(value) == null) {
+        cardCount.put(value, 0);
+      }
+      int deckIdx = cardCount.get(value);
+      cardCount.put(value, deckIdx + 1);
+
+      hand.cards.add(new Card(face, suit, deckIdx));
     }
     return hand;
   }

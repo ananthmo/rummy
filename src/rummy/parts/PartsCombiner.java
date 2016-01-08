@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rummy.core.Card;
+import rummy.core.Card.Face;
 
 /**
  * Combines a list of part tokens (eg rummys, sets, partial rummys, single cards, etc) into a hand
@@ -64,7 +65,7 @@ public class PartsCombiner {
     this.parts = pruneParts(parts);
   }
 
-  // Create the various maps which will be used in the backtracking algorithm.
+  // Create the maps which will be used in the backtracking algorithm.
   //
   // Eg, suppose we have parts NatRummy[3H-4H-5H], Set[3H-3S-3C], Rummy[5H-jk-7H], Single[3H],
   // Single[4H], Single[5H].  The follow map associations will be created:
@@ -132,7 +133,9 @@ public class PartsCombiner {
     for (Part part : parts) {
       boolean skip = false;
       if (part.type == PartType.NATURAL_RUMMY) {
-        if (part.cards.size() == 3 && blackListed.size() <= 3) {
+        if (part.cards.size() == 3
+            && blackListed.size() <= 3
+            && part.cards.get(0).face != Face.ACE) {
           blackListed.addAll(part.cards);
         }
       } else if (part.type != PartType.RUMMY) {
@@ -147,6 +150,7 @@ public class PartsCombiner {
         pruned.add(part);
       }
     }
+    //System.out.println("pruned:" + pruned);
     return pruned;
   }
 
@@ -178,10 +182,11 @@ public class PartsCombiner {
   private void search(
       BitSet availableParts,
       int startIdx,
-      Set<Part> parts,
+      Set<Part> runningParts,
       Set<Card> availableCards,
       Set<Card> usedCards,
       Solution solution) {
+    //System.out.println(runningParts + "     " + availableCards + " " + availableParts);
     if (solution.isWinning) {
       // Found a solution, end the search.
       return;
@@ -190,9 +195,9 @@ public class PartsCombiner {
     searchIterations++;
     if (usedCards.size() == handSize && availableCards.size() == (extraCard ? 1 : 0)) {
       // Found a solution, record it if its the best one so far
-      int score = computeScore(parts);
+      int score = computeScore(runningParts);
       if (score > solution.score) {
-        solution.parts = new ArrayList<Part>(parts);
+        solution.parts = new ArrayList<Part>(runningParts);
         solution.score = score;
         solution.freeCards = new ArrayList<Card>(availableCards);
         if (score >= PartsScorer.WIN_SCORE) {
@@ -218,12 +223,12 @@ public class PartsCombiner {
 
       // No use in continuing if first/second part is a single, there must be a better hand
       // previously.
-      if (nextPart.type == PartType.SINGLE && parts.size() <= 1) {
+      if (nextPart.type == PartType.SINGLE && runningParts.size() <= 1 && parts.size() > 25) {
         return;
       }
 
       // Use this part.
-      parts.add(nextPart);
+      runningParts.add(nextPart);
       usedCards.addAll(nextPart.cards);
 
       // Mark which other parts are no longer available for use, as their cards will overlap with
@@ -233,18 +238,18 @@ public class PartsCombiner {
       availableParts.andNot(usedPartSet);
 
       // Recursively search through remaining cards to form a hand
-      search(availableParts, bitIdx + 1, parts, availableCards, usedCards, solution);
+      search(availableParts, bitIdx + 1, runningParts, availableCards, usedCards, solution);
 
       // Restore hand to original state as if the part was not used.
       availableParts.or(original);
-      parts.remove(nextPart);
+      runningParts.remove(nextPart);
       usedCards.removeAll(nextPart.cards);
       availableCards.addAll(nextPart.cards);
     }
   }
 
   /**
-   * Holder for information about a particular set of parts that form a hand.
+   * Holder for information about a particular set of parts that formed a hand.
    */
   public static class Solution {
     public List<Part> parts = null;

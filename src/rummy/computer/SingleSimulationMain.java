@@ -10,7 +10,7 @@ public class SingleSimulationMain {
 
   public static void main(String[] args) {
     Computer comp = new Computer();
-    Deck deck = new Deck(2);
+    Deck deck = new Deck(2 /* decks */, 4 /* jokers */);
     deck.shuffle();
     comp.drawNewHand(deck);
 

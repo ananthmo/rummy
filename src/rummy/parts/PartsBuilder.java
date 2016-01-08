@@ -2,7 +2,10 @@ package rummy.parts;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 import rummy.core.Card;
 import rummy.core.Card.Face;
@@ -28,7 +31,7 @@ public class PartsBuilder {
     }
   };
 
-  List<Card> jokers = new ArrayList<>();
+  private List<Card> jokers = new ArrayList<>();
 
   // Tokenizes a hand of cards into a list of Parts (eg Rummys, Sets, partial sets, etc).
   public List<Part> buildParts(Hand hand) {
@@ -63,51 +66,86 @@ public class PartsBuilder {
     List<Part> parts = new ArrayList<>();
     cards.sort(COMPARE_BY_VALUE);
 
+    Map<Face, Stack<Card>> qkaStacks = new HashMap<>();
+    qkaStacks.put(Face.ACE, new Stack<>());
+    qkaStacks.put(Face.KING, new Stack<>());
+    qkaStacks.put(Face.QUEEN, new Stack<>());
+
     Card prev = null;
-    List<Card> run = new ArrayList<>();
-    List<Card> qkaRun = new ArrayList<>();
+    List<List<Card>> cardSets = new ArrayList<>();
     for (int i = 0; i < cards.size(); i++) {
       Card card = cards.get(i);
       if (prev != null
-          && (card.suit != prev.suit || card.face.ordinal() != prev.face.ordinal() + 1)) {
-        if (run.size() == 2 && jokers.size() > 0) {
-          parts.add(Part.rummyWithJoker(run, jokers.get(0)));
-          if (jokers.size() > 1) {
-            parts.add(Part.rummyWithJoker(run, jokers.get(0), jokers.get(1)));
-          }
-        }
+          && (card.suit != prev.suit || card.face.ordinal() != prev.face.ordinal() + 1)
+          && (card.value != prev.value)) {
+        List<List<Card>> setRuns = expandCardSets(cardSets);
+        parts.addAll(rummyRunsToParts(setRuns));
 
-        run.clear();
+        cardSets.clear();
         if (card.suit != prev.suit) {
-          qkaRun.clear();
+          // Reset the QKA stacks only on suit change
+          for (Stack<Card> stack : qkaStacks.values()) {
+            stack.clear();
+          }
         }
       }
 
       // Check for wrapping Q-K-A runs
       if (card.face == Face.ACE || card.face == Face.KING || card.face == Face.QUEEN) {
-        qkaRun.add(card);
-        if (qkaRun.size() == 3) {
+        qkaStacks.get(card.face).add(card);
+        if (!qkaStacks.get(Face.ACE).isEmpty()
+            && !qkaStacks.get(Face.KING).isEmpty()
+            && !qkaStacks.get(Face.QUEEN).isEmpty()) {
+          List<Card> qkaRun = new ArrayList<Card>();
+          qkaRun.add(qkaStacks.get(Face.ACE).pop());
+          qkaRun.add(qkaStacks.get(Face.KING).pop());
+          qkaRun.add(qkaStacks.get(Face.QUEEN).pop());
           parts.add(Part.naturalRummy(qkaRun));
         }
       }
 
-      run.add(card);
-      if (run.size() == 3 || run.size() == 4) {
-        parts.add(Part.naturalRummy(run));
-        for (Card joker : jokers) {
-          parts.add(Part.rummyWithJoker(run, joker));
-        }
-        if (run.size() == 3 && jokers.size() == 2) {
-          parts.add(Part.rummyWithJoker(run, jokers.get(0), jokers.get(1)));
-        }
-      } else if (run.size() == 2) { // Note: only adds the first 2 cards in the sequence
-        parts.add(Part.partialRummy(run));
+      if (prev != null && card.value == prev.value && !cardSets.isEmpty()) {
+        cardSets.get(cardSets.size() - 1).add(card);
+      } else {
+        cardSets.add(new ArrayList<>());
+        cardSets.get(cardSets.size() - 1).add(card);
       }
 
       prev = card;
     }
 
     return parts;
+  }
+
+  private static List<List<Card>> expandCardSets(List<List<Card>> cardSets) {
+    //System.out.println("input:" + cardSets);
+    List<List<Card>> runs = new ArrayList<>();
+    List<List<Card>> selectedRuns = new ArrayList<>();
+    for (List<Card> cardSet : cardSets) {
+      if (runs.isEmpty()) {
+        // Initialize run to first card set
+        for (Card card : cardSet) {
+          List<Card> singleCard = new ArrayList<Card>();
+          singleCard.add(card);
+          runs.add(singleCard);
+        }
+      } else {
+        // Multiply the previous run by this card set
+        List<List<Card>> expandedRuns = new ArrayList<>();
+        for (List<Card> run : runs) {
+          for (Card card : cardSet) {
+            List<Card> newRun = new ArrayList<>();
+            newRun.addAll(run);
+            newRun.add(card);
+            expandedRuns.add(newRun);
+            selectedRuns.add(newRun);
+          }
+        }
+        runs = expandedRuns;
+      }
+    }
+    //System.out.println("returning cardSets:" + selectedRuns);
+    return selectedRuns;
   }
 
   /**
@@ -131,42 +169,72 @@ public class PartsBuilder {
   List<Part> findSetParts(List<Card> cards) {
     cards.sort(COMPARE_BY_FACE);
     List<Part> parts = new ArrayList<>();
-    List<Card> run = new ArrayList<>();
+    List<List<Card>> runCardSets = new ArrayList<>();
     Card prev = null;
     for (int i = 0; i < cards.size(); i++) {
       Card card = cards.get(i);
 
-      if (prev != null && card.face != prev.face) {
-        if (run.size() == 2 && jokers.size() > 0) {
-          for (Card joker : jokers) {
-            parts.add(Part.setWithJoker(run, joker));
-          }
-          if (jokers.size() > 1) {
-            parts.add(Part.setWithJoker(run, jokers.get(0), jokers.get(1)));
-          }
-        }
-
-        run.clear();
+      if (prev != null && card.face != prev.face && card.value != prev.value) {
+        List<List<Card>> setRuns = expandCardSets(runCardSets);
+        parts.addAll(setRunsToParts(setRuns));
+        runCardSets.clear();
       }
 
-      run.add(card);
-      if (run.size() == 3 || run.size() == 4) {
-        parts.add(Part.set(run));
-        for (Card joker : jokers) {
-          parts.add(Part.setWithJoker(run, joker));
-        }
-      } else if (run.size() == 2) { // Note: only adds first 2 cards of group
-        parts.add(Part.partialSet(run));
+      if (prev != null && card.value == prev.value) {
+        runCardSets.get(runCardSets.size() - 1).add(card);
+      } else {
+        runCardSets.add(new ArrayList<>());
+        runCardSets.get(runCardSets.size() - 1).add(card);
       }
 
       prev = card;
     }
-    if (run.size() == 2 && jokers.size() > 0) {
-      for (Card joker : jokers) {
-        parts.add(Part.setWithJoker(run, joker));
+    List<List<Card>> setRuns = expandCardSets(runCardSets);
+    parts.addAll(setRunsToParts(setRuns));
+    return parts;
+  }
+
+  List<Part> setRunsToParts(List<List<Card>> sets) {
+    List<Part> parts = new ArrayList<>();
+    for (List<Card> run : sets) {
+      if (run.size() >= 3) {
+        parts.add(Part.set(run));
+        if (run.size() == 3) {
+          for (Card joker : jokers) {
+            parts.add(Part.setWithJoker(run, joker));
+          }
+        }
+      } else if (run.size() == 2) {
+        parts.add(Part.partialSet(run));
+        for (Card joker : jokers) {
+          parts.add(Part.setWithJoker(run, joker));
+        }
+        if (jokers.size() > 1) {
+          parts.add(Part.setWithJoker(run, jokers.get(0), jokers.get(1)));
+        }
       }
-      if (jokers.size() > 1) {
-        parts.add(Part.setWithJoker(run, jokers.get(0), jokers.get(1)));
+    }
+    return parts;
+  }
+
+  List<Part> rummyRunsToParts(List<List<Card>> rummyRuns) {
+    List<Part> parts = new ArrayList<>();
+    for (List<Card> run : rummyRuns) {
+      if (run.size() >= 3) {
+        parts.add(Part.naturalRummy(run));
+        if (run.size() == 3) {
+          for (Card joker : jokers) {
+            parts.add(Part.rummyWithJoker(run, joker));
+          }
+        }
+      } else if (run.size() == 2) {
+        parts.add(Part.partialRummy(run));
+        for (Card joker : jokers) {
+          parts.add(Part.rummyWithJoker(run, joker));
+        }
+        if (jokers.size() > 1) {
+          parts.add(Part.rummyWithJoker(run, jokers.get(0), jokers.get(1)));
+        }
       }
     }
     return parts;

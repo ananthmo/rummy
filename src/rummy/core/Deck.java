@@ -15,11 +15,13 @@ public class Deck {
   /**
    * Constructs a deck of 52-cards, one card of each face/suit pair.
    */
-  public Deck(int numJokers) {
+  public Deck(int numDecks, int numJokers) {
     this.cards = new Stack<>();
-    for (Suit suit : Suit.SUITS) {
-      for (Face face: Face.FACES) {
-        cards.add(new Card(face, suit));
+    for (int i = 0; i < numDecks; i++){
+      for (Suit suit : Suit.SUITS) {
+        for (Face face: Face.FACES) {
+          cards.add(new Card(face, suit, i));
+        }
       }
     }
     for (int i = 0; i < numJokers; i++) {

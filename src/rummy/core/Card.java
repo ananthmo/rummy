@@ -49,12 +49,14 @@ public class Card {
   public final Suit suit;
   public final int value;
   public final int jokerIdx;
+  public final int deckIdx;
 
-  public Card(Face face, Suit suit) {
+  public Card(Face face, Suit suit, int deckIdx) {
     this.face = face;
     this.suit = suit;
     this.value = suit.ordinal() * 13 + face.ordinal();
     this.jokerIdx = 0;
+    this.deckIdx = deckIdx;
   }
 
   public Card(int jokerIdx) {
@@ -62,6 +64,7 @@ public class Card {
     this.face = null;
     this.suit = null;
     this.value = -1;
+    this.deckIdx = -1;
   }
 
   public boolean isJoker() {
@@ -100,8 +103,12 @@ public class Card {
     return result;
   }
 
+  public static Card build(Face face, Suit suit, int deckIdx) {
+    return new Card(face, suit, deckIdx);
+  }
+
   public static Card build(Face face, Suit suit) {
-    return new Card(face, suit);
+    return new Card(face, suit, 0);
   }
 
   @Override
@@ -113,11 +120,12 @@ public class Card {
     return face == other.face
         && suit == other.suit
         && value == other.value
-        && jokerIdx == other.jokerIdx;
+        && jokerIdx == other.jokerIdx
+        && deckIdx == other.deckIdx;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(face, suit, value, jokerIdx);
+    return Objects.hash(face, suit, value, jokerIdx, deckIdx);
   }
 }
