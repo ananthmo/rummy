@@ -40,7 +40,6 @@ public class PartsScorer {
   public boolean isWinning(Collection<Part> parts) {
     boolean natural = false;
     boolean rummy = false;
-    boolean allSetsOrRuns = true;
     int numCards = 0;
     for (Part part : parts) {
       numCards += part.cards.size();
@@ -53,9 +52,10 @@ public class PartsScorer {
       } else if (part.type == PartType.RUMMY) {
         rummy = true;
       } else if (part.type != PartType.SET) {
-        allSetsOrRuns = false;
+        // Can't be a winning hand, does not consist of all nats/rummys/sets.
+        return false;
       }
     }
-    return numCards == 13 && natural && rummy && allSetsOrRuns;
+    return numCards == 13 && natural && rummy;
   }
 }

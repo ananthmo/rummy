@@ -14,11 +14,11 @@ import rummy.core.Hand;
 import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
 import rummy.parts.Part;
-import rummy.parts.PartsBuilder;
+import rummy.parts.PartsTokenizer;
 import rummy.parts.PartsCombiner;
 import rummy.parts.PartsCombiner.Solution;
 
-public class PartsBuilderTest {
+public class PartsTokenizerTest {
 
   @Test
   //@Ignore
@@ -40,7 +40,7 @@ public class PartsBuilderTest {
       Card.build(Face.FOUR, Suit.SPADES)
     );
 
-    List<Part> parts = new PartsBuilder().buildParts(hand);
+    List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -65,7 +65,7 @@ public class PartsBuilderTest {
       Card.build(Face.TWO, Suit.SPADES)
     );
 
-    List<Part> parts = new PartsBuilder().buildParts(hand);
+    List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println("qka parts:" + parts.toString());
   }
 
@@ -82,7 +82,7 @@ public class PartsBuilderTest {
       Card.build(Face.SIX, Suit.HEARTS)
     );
 
-    List<Part> parts = new PartsBuilder().buildParts(hand);
+    List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -97,7 +97,7 @@ public class PartsBuilderTest {
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
     System.out.println("hand:" + hand.cards);
-    List<Part> parts = new PartsBuilder().buildParts(hand);
+    List<Part> parts = new PartsTokenizer().tokenize(hand);
     assertTrue(parts.size() > 0);
     System.out.println(parts);
     Solution solution = new PartsCombiner(parts, true).findBestHand();
@@ -136,7 +136,7 @@ public class PartsBuilderTest {
   private static void checkWin(String in, boolean extraCard) {
     System.out.println("checkWin");
     Hand hand = toHand(in);
-    List<Part> parts = new PartsBuilder().buildParts(hand);
+    List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println(parts);
     Solution solution = new PartsCombiner(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
@@ -146,7 +146,7 @@ public class PartsBuilderTest {
   private static void checkSolution(String in, boolean extraCard) {
     System.out.println("checkSolution");
     Hand hand = toHand(in);
-    List<Part> parts = new PartsBuilder().buildParts(hand);
+    List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println(parts);
     Solution solution = new PartsCombiner(parts, extraCard).findBestHand();
     System.out.println(solution.parts);

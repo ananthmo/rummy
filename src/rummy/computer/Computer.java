@@ -6,7 +6,7 @@ import rummy.core.Card;
 import rummy.core.Deck;
 import rummy.core.Hand;
 import rummy.parts.Part;
-import rummy.parts.PartsBuilder;
+import rummy.parts.PartsTokenizer;
 import rummy.parts.PartsCombiner;
 import rummy.parts.PartsCombiner.Solution;
 import rummy.parts.PartsScorer;
@@ -57,8 +57,8 @@ public class Computer {
   }
 
   public Solution computeScore(Hand hand, boolean extraCard) {
-    PartsBuilder partsBuilder = new PartsBuilder();
-    List<Part> parts = partsBuilder.buildParts(hand);
+    PartsTokenizer partsTokenizer = new PartsTokenizer();
+    List<Part> parts = partsTokenizer.tokenize(hand);
     PartsCombiner combiner = new PartsCombiner(parts, extraCard);
     Solution sol = combiner.findBestHand();
     return sol;

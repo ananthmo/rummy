@@ -60,6 +60,10 @@ public class PartsCombiner {
     initializeBitMaps();
   }
 
+  public PartsCombiner(List<Part> parts, boolean extraCard) {
+    this(DEFAULT_HAND_SIZE, parts, extraCard);
+  }
+
   private void preparePartsForSearch() {
     this.parts.sort(PARTS_BY_ORDINAL);
     this.parts = pruneParts(parts);
@@ -117,15 +121,11 @@ public class PartsCombiner {
     }
   }
 
-  public PartsCombiner(List<Part> parts, boolean extraCard) {
-    this(DEFAULT_HAND_SIZE, parts, extraCard);
-  }
-
   /**
    * Shortens a list of parts, in order to lower the computation time for finding optimal part
    * configurations. This will make it impossible to find the optimal hand in certain (hopefully
-   * rare) cases. It will remove parts that belong to a 3-card rummy (eg, those cards are stuck
-   * to the rummy, don't consider any other usages).
+   * rare) cases. It will remove parts that belong to some 3-card rummys (eg, those cards are stuck
+   * to the rummy, can't consider any other usages).
    */
   static List<Part> pruneParts(List<Part> parts) {
     List<Part> pruned = new ArrayList<>();
@@ -150,7 +150,6 @@ public class PartsCombiner {
         pruned.add(part);
       }
     }
-    //System.out.println("pruned:" + pruned);
     return pruned;
   }
 
@@ -164,19 +163,15 @@ public class PartsCombiner {
     }
 
     // Find which parts to use that optimizes the score
-    Solution solution = new Solution();
+    Solution best = new Solution();
     search(
         availableParts,
         0 /* startBitIdx */,
         new LinkedHashSet<>() /* running parts */,
         allCards,
         new LinkedHashSet<>() /* used cards */,
-        solution);
-    return solution;
-  }
-
-  private int computeScore(Set<Part> parts) {
-    return scorer.scoreParts(parts) + (scorer.isWinning(parts) ? PartsScorer.WIN_SCORE : 0);
+        best);
+    return best;
   }
 
   private void search(
@@ -185,10 +180,10 @@ public class PartsCombiner {
       Set<Part> runningParts,
       Set<Card> availableCards,
       Set<Card> usedCards,
-      Solution solution) {
+      Solution best) {
     //System.out.println(runningParts + "     " + availableCards + " " + availableParts);
-    if (solution.isWinning) {
-      // Found a solution, end the search.
+    if (best.isWinning) {
+      // Found a winning solution, end the search.
       return;
     }
 
@@ -196,13 +191,11 @@ public class PartsCombiner {
     if (usedCards.size() == handSize && availableCards.size() == (extraCard ? 1 : 0)) {
       // Found a solution, record it if its the best one so far
       int score = computeScore(runningParts);
-      if (score > solution.score) {
-        solution.parts = new ArrayList<Part>(runningParts);
-        solution.score = score;
-        solution.freeCards = new ArrayList<Card>(availableCards);
-        if (score >= PartsScorer.WIN_SCORE) {
-          solution.isWinning = true;
-        }
+      if (score > best.score) {
+        best.parts = new ArrayList<Part>(runningParts);
+        best.score = score;
+        best.freeCards = new ArrayList<Card>(availableCards);
+        best.isWinning = score >= PartsScorer.WIN_SCORE;
       }
       return;
     }
@@ -238,7 +231,7 @@ public class PartsCombiner {
       availableParts.andNot(usedPartSet);
 
       // Recursively search through remaining cards to form a hand
-      search(availableParts, bitIdx + 1, runningParts, availableCards, usedCards, solution);
+      search(availableParts, bitIdx + 1, runningParts, availableCards, usedCards, best);
 
       // Restore hand to original state as if the part was not used.
       availableParts.or(original);
@@ -246,6 +239,10 @@ public class PartsCombiner {
       usedCards.removeAll(nextPart.cards);
       availableCards.addAll(nextPart.cards);
     }
+  }
+
+  private int computeScore(Set<Part> parts) {
+    return scorer.scoreParts(parts) + (scorer.isWinning(parts) ? PartsScorer.WIN_SCORE : 0);
   }
 
   /**
