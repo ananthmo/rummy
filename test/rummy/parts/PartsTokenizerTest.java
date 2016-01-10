@@ -15,8 +15,8 @@ import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
 import rummy.parts.Part;
 import rummy.parts.PartsTokenizer;
-import rummy.parts.PartsCombiner;
-import rummy.parts.PartsCombiner.Solution;
+import rummy.parts.PartsSolver;
+import rummy.parts.PartsSolver.Solution;
 
 public class PartsTokenizerTest {
 
@@ -44,12 +44,12 @@ public class PartsTokenizerTest {
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
-    PartsCombiner combiner = new PartsCombiner(13, parts, true);
-    Solution solution = combiner.findBestHand();
+    PartsSolver solver = new PartsSolver(13, parts, true);
+    Solution solution = solver.findBestHand();
     assertNotNull(solution.parts);
     System.out.println("solution");
     System.out.println(solution.parts);
-    System.out.println(combiner.searchIterations);
+    System.out.println(solver.searchIterations);
   }
 
   @Test
@@ -86,7 +86,7 @@ public class PartsTokenizerTest {
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
-    Solution solution = new PartsCombiner(7, parts, false).findBestHand();
+    Solution solution = new PartsSolver(7, parts, false).findBestHand();
     //assertNotNull(solution.parts);
     System.out.println("solution");
     System.out.println(solution.parts);
@@ -100,7 +100,7 @@ public class PartsTokenizerTest {
     List<Part> parts = new PartsTokenizer().tokenize(hand);
     assertTrue(parts.size() > 0);
     System.out.println(parts);
-    Solution solution = new PartsCombiner(parts, true).findBestHand();
+    Solution solution = new PartsSolver(parts, true).findBestHand();
     //assertNotNull(solution.parts);
     System.out.println("solution:" + solution.parts);
     System.out.println(solution.score);
@@ -138,7 +138,7 @@ public class PartsTokenizerTest {
     Hand hand = toHand(in);
     List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println(parts);
-    Solution solution = new PartsCombiner(parts, extraCard).findBestHand();
+    Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.isWinning);
   }
@@ -148,7 +148,7 @@ public class PartsTokenizerTest {
     Hand hand = toHand(in);
     List<Part> parts = new PartsTokenizer().tokenize(hand);
     System.out.println(parts);
-    Solution solution = new PartsCombiner(parts, extraCard).findBestHand();
+    Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.score > -100);
     assertTrue(solution.freeCards.size() == 1);

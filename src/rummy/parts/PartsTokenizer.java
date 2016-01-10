@@ -13,7 +13,7 @@ import rummy.core.Hand;
 
 /**
  * Tokenizes a hand of cards into a list of {@link Part}s. The cards can belong to any number of
- * decks. The created parts can then be processed by a {@link PartsCombiner}, to find a combination
+ * decks. The created parts can then be processed by a {@link PartsSolver}, to find a combination
  * that forms the best hand (via a scoring metric).
  */
 public class PartsTokenizer {

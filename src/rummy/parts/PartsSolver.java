@@ -19,7 +19,7 @@ import rummy.core.Card.Face;
  * valid hand via backtracking. Applies various pruning mechanisms to lower the search space, at
  * the cost of missing some (hopefully rare) optimal hand configurations.
  */
-public class PartsCombiner {
+public class PartsSolver {
 
   private static final int DEFAULT_HAND_SIZE = 13;
 
@@ -47,7 +47,7 @@ public class PartsCombiner {
   };
 
   // Allows for a different handSize just for testing purposes
-  PartsCombiner(int handSize, List<Part> parts, boolean extraCard) {
+  PartsSolver(int handSize, List<Part> parts, boolean extraCard) {
     this.parts = parts;
     this.handSize = handSize;
     this.extraCard = extraCard;
@@ -60,7 +60,7 @@ public class PartsCombiner {
     initializeBitMaps();
   }
 
-  public PartsCombiner(List<Part> parts, boolean extraCard) {
+  public PartsSolver(List<Part> parts, boolean extraCard) {
     this(DEFAULT_HAND_SIZE, parts, extraCard);
   }
 
