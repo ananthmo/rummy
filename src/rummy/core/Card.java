@@ -35,7 +35,7 @@ public class Card {
     KING(10),
     JOKER(0);
 
-    final int points;
+    public final int points;
 
     Face(int points) {
       this.points = points;
@@ -61,8 +61,8 @@ public class Card {
 
   public Card(int jokerIdx) {
     this.jokerIdx = jokerIdx;
-    this.face = null;
-    this.suit = null;
+    this.face = Face.JOKER;
+    this.suit = Suit.JOKER;
     this.value = -1;
     this.deckIdx = -1;
   }

@@ -13,7 +13,7 @@ import rummy.core.Deck;
 public class ComputerSimulationMain {
 
   public static void main(String args[]) {
-    int numComputers = 4;
+    int numComputers = 5;
     int numDecks = 3;
     int numJokers = 6;
 
@@ -32,7 +32,8 @@ public class ComputerSimulationMain {
     while (true) {
       for (int i = 0; i < computers.size(); i++) {
         Computer computer = computers.get(i);
-        System.out.println("T" + turn++ + " Computer: " + (i + 1) + ": " + computer.hand + " top:" + top);
+        System.out.println(
+            "T" + turn++ + " Computer: " + (i + 1) + ": " + computer.hand + " top:" + top);
 
         PickupResult pickupResult = computer.checkPickup(top);
         if (pickupResult.keepCard) {
@@ -45,13 +46,20 @@ public class ComputerSimulationMain {
         }
 
         if (top == null) {
-          System.out.println("winner!");
           break;
         }
       }
       if (top == null) {
         break;
       }
+    }
+
+    System.out.println();
+    System.out.println("winner!");
+    for (int i = 0; i < computers.size() ; i++) {
+      Computer computer = computers.get(i);
+      System.out.println(
+          "computer " + (i + 1) + ": " + computer.hand + " " + computer.currentPoints);
     }
   }
 }

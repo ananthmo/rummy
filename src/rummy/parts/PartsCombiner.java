@@ -194,8 +194,9 @@ public class PartsCombiner {
       if (score > best.score) {
         best.parts = new ArrayList<Part>(runningParts);
         best.score = score;
+        best.points = PartsScorer.calculatePoints(runningParts);
+        best.isWinning = best.points == 0;
         best.freeCards = new ArrayList<Card>(availableCards);
-        best.isWinning = score >= PartsScorer.WIN_SCORE;
       }
       return;
     }
@@ -242,7 +243,7 @@ public class PartsCombiner {
   }
 
   private int computeScore(Set<Part> parts) {
-    return scorer.scoreParts(parts) + (scorer.isWinning(parts) ? PartsScorer.WIN_SCORE : 0);
+    return scorer.scoreParts(parts);
   }
 
   /**
@@ -251,6 +252,7 @@ public class PartsCombiner {
   public static class Solution {
     public List<Part> parts = null;
     public int score = -999999;
+    public int points = PartsScorer.FULL_HAND_POINTS;
     public List<Card> freeCards = null;
     public boolean isWinning = false;
   }

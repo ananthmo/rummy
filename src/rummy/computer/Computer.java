@@ -21,6 +21,7 @@ public class Computer {
 
   Hand hand;
   int currentHandScore = -99999;
+  int currentPoints = PartsScorer.FULL_HAND_POINTS;
 
   public Computer() {
     scorer = new PartsScorer();
@@ -31,14 +32,10 @@ public class Computer {
     for (int i = 0; i < 13; i++) {
       hand.cards.add(deck.draw());
     }
-    currentHandScore = computeScore(hand, false).score;
-  }
 
-  public boolean shouldPickup(Card card) {
-    Hand newHand = new Hand(hand);
-    newHand.cards.add(card);
-    int newScore = computeScore(newHand, true).score;
-    return newScore > currentHandScore * 1.15 && newScore > 0;
+    Solution solution = computeScore(hand, false);
+    currentHandScore = solution.score;
+    currentPoints = solution.points;
   }
 
   public static class PickupResult {
@@ -54,7 +51,7 @@ public class Computer {
     Hand newHand = new Hand(hand);
     newHand.cards.add(card);
     Solution solution = computeScore(newHand, true);
-    boolean keepCard = solution.score >= currentHandScore * 1.15;
+    boolean keepCard = solution.isWinning || solution.score >= currentHandScore * 1.15;
 
     if (keepCard) {
       return new PickupResult(true, formHand(solution));
@@ -71,12 +68,13 @@ public class Computer {
 
   private Card formHand(Solution solution) {
     currentHandScore = solution.score;
+    currentPoints = solution.points;
     Card freeCard = solution.freeCards.get(0);
     hand.cards.clear();
     for (Part part : solution.parts) {
       hand.cards.addAll(part.cards);
     }
-    if (scorer.isWinning(solution.parts)) {
+    if (currentPoints == 0) {
       return null;
     }
     return freeCard;
