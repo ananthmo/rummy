@@ -36,21 +36,47 @@ public class Computer {
 
   public boolean shouldPickup(Card card) {
     Hand newHand = new Hand(hand);
-    hand.cards.add(card);
+    newHand.cards.add(card);
     int newScore = computeScore(newHand, true).score;
-    return newScore > currentHandScore * 1.15;
+    return newScore > currentHandScore * 1.15 && newScore > 0;
+  }
+
+  public static class PickupResult {
+    final boolean keepCard;
+    final Card freeCard;
+    public PickupResult(boolean keepCard, Card freeCard) {
+      this.keepCard = keepCard;
+      this.freeCard = freeCard;
+    }
+  }
+
+  public PickupResult checkPickup(Card card) {
+    Hand newHand = new Hand(hand);
+    newHand.cards.add(card);
+    Solution solution = computeScore(newHand, true);
+    boolean keepCard = solution.score >= currentHandScore * 1.15;
+
+    if (keepCard) {
+      return new PickupResult(true, formHand(solution));
+    } else {
+      return new PickupResult(false, null);
+    }
   }
 
   public Card drawAndDiscard(Card card) {
     hand.cards.add(card);
-    Solution sol = computeScore(hand, true);
-    currentHandScore = sol.score;
-    Card freeCard = sol.freeCards.get(0);
+    Solution solution = computeScore(hand, true);
+    return formHand(solution);
+  }
+
+  private Card formHand(Solution solution) {
+    currentHandScore = solution.score;
+    Card freeCard = solution.freeCards.get(0);
     hand.cards.clear();
-    for (Part part : sol.parts) {
+    for (Part part : solution.parts) {
       hand.cards.addAll(part.cards);
     }
-    if (scorer.isWinning(sol.parts)) {
+    if (scorer.isWinning(solution.parts)) {
       return null;
     }
     return freeCard;
