@@ -192,7 +192,7 @@ public class PartsSolver {
       if (score > best.score) {
         best.parts = new ArrayList<Part>(runningParts);
         best.score = score;
-        best.points = SimpleScorer.calculatePoints(runningParts);
+        best.points = ScoreUtil.calculatePoints(runningParts);
         best.isWinning = best.points == 0;
         best.freeCards = new ArrayList<Card>(availableCards);
       }
@@ -250,7 +250,7 @@ public class PartsSolver {
   public static class Solution {
     public List<Part> parts = null;
     public int score = -999999;
-    public int points = SimpleScorer.FULL_HAND_POINTS;
+    public int points = ScoreUtil.FULL_HAND_POINTS;
     public List<Card> freeCards = null;
     public boolean isWinning = false;
   }
