@@ -9,7 +9,7 @@ import rummy.parts.Part;
 import rummy.parts.PartsTokenizer;
 import rummy.parts.PartsSolver;
 import rummy.parts.PartsSolver.Solution;
-import rummy.parts.PartsScorer;
+import rummy.parts.SimpleScorer;
 
 /**
  * Represents a AI-controller player (eg computer or bot), than uses a back-tracking algorithm
@@ -17,14 +17,14 @@ import rummy.parts.PartsScorer;
  */
 public class Computer {
 
-  final PartsScorer scorer;
+  final SimpleScorer scorer;
 
   Hand hand;
   int currentHandScore = -99999;
-  int currentPoints = PartsScorer.FULL_HAND_POINTS;
+  int currentPoints = SimpleScorer.FULL_HAND_POINTS;
 
   public Computer() {
-    scorer = new PartsScorer();
+    scorer = new SimpleScorer();
   }
 
   public void drawNewHand(Deck deck) {

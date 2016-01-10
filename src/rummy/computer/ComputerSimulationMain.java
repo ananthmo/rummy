@@ -13,9 +13,9 @@ import rummy.core.Deck;
 public class ComputerSimulationMain {
 
   public static void main(String args[]) {
-    int numComputers = 5;
-    int numDecks = 3;
-    int numJokers = 6;
+    int numComputers = 1;
+    int numDecks = 2;
+    int numJokers = 4;
 
     Deck deck = new Deck(numDecks, numJokers);
     deck.shuffle();

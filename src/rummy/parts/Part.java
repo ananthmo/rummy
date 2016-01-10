@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 import rummy.core.Card;
+import rummy.core.Card.Face;
 
 /** The possible ways of breaking down a rummy hand. */
 enum PartType {
@@ -25,10 +26,12 @@ public class Part {
 
   public final PartType type;
   public final List<Card> cards;
+  public boolean containsAce;
 
   Part(PartType type, List<Card> cards) {
     this.type = type;
     this.cards = cards;
+    this.containsAce = hasAce(cards);
   }
 
   public String toString() {
@@ -71,6 +74,15 @@ public class Part {
 
   public static Part single(Card card) {
     return new Part(PartType.SINGLE, Arrays.asList(card));
+  }
+
+  private static boolean hasAce(List<Card> cards) {
+    for (Card card : cards) {
+      if (card.face == Face.ACE) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override

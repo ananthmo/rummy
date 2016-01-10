@@ -39,7 +39,7 @@ public class Deck {
 
   public void shuffle() {
     int numCards = cards.size();
-    Random rand = new Random();
+    Random rand = new Random(9);
 
     for (int i = 0; i < NUM_SHUFFLE_SWAPS; i++) {
       int c1idx = rand.nextInt(numCards);

@@ -6,30 +6,24 @@ import java.util.Set;
 import rummy.core.Card;
 
 /**
- * Evaluates how good a set of parts is. Scores can be compared to construct the best hand.
+ * Scorer that looks at each part independently.
  */
-public class PartsScorer {
+public class SimpleScorer implements Scorer {
 
-  public static final int WIN_SCORE = 1_000_000;
   public static final int FULL_HAND_POINTS = 80;
 
   private int scorePart(Part part) {
     switch (part.type) {
       case NATURAL_RUMMY: return 1000;
-      case PARTIAL_RUMMY: return 75;
+      case PARTIAL_RUMMY: return part.containsAce ? 50 : 75;
       case PARTIAL_SET: return 50;
-      case RUMMY: return 300;
+      case RUMMY: return part.containsAce ? 250 : 300;
       case SET: return 200;
       case SINGLE: return part.cards.get(0).isJoker() ? 105 : -5;
       default: throw new IllegalStateException("bad card");
     }
   }
 
-  // TODO: possible improvements
-  // - weigh second natural lower
-  // - multiplier for single/partials
-  // - weigh Ace partial runs lower
-  // - weigh first part of 4 higher?
   public int scoreParts(Set<Part> parts) {
     int score = 0;
     for (Part part : parts) {

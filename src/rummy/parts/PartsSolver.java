@@ -28,7 +28,6 @@ public class PartsSolver {
   private final Map<Part, Integer> partToBitIdx;
   private final Map<Part, BitSet> partToBitSet;
 
-  private final PartsScorer scorer;
   private List<Part> parts;
   private final int handSize;
   private final boolean extraCard;
@@ -51,7 +50,6 @@ public class PartsSolver {
     this.parts = parts;
     this.handSize = handSize;
     this.extraCard = extraCard;
-    this.scorer = new PartsScorer();
     this.bitIdxToPart = new HashMap<>();
     this.partToBitIdx = new HashMap<>();
     this.partToBitSet = new HashMap<>();
@@ -194,7 +192,7 @@ public class PartsSolver {
       if (score > best.score) {
         best.parts = new ArrayList<Part>(runningParts);
         best.score = score;
-        best.points = PartsScorer.calculatePoints(runningParts);
+        best.points = SimpleScorer.calculatePoints(runningParts);
         best.isWinning = best.points == 0;
         best.freeCards = new ArrayList<Card>(availableCards);
       }
@@ -243,7 +241,7 @@ public class PartsSolver {
   }
 
   private int computeScore(Set<Part> parts) {
-    return scorer.scoreParts(parts);
+    return new ComplexScorer().scoreParts(parts);
   }
 
   /**
@@ -252,7 +250,7 @@ public class PartsSolver {
   public static class Solution {
     public List<Part> parts = null;
     public int score = -999999;
-    public int points = PartsScorer.FULL_HAND_POINTS;
+    public int points = SimpleScorer.FULL_HAND_POINTS;
     public List<Card> freeCards = null;
     public boolean isWinning = false;
   }
