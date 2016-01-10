@@ -54,11 +54,12 @@ public class ComplexScorer implements Scorer {
       return part.cards.get(0).face == Face.JOKER ? JOKER_POINT : SINGLE_POINT;
     }
 
-    // Use a multiplier to invalidate certain parts, such as runs of 5 or second run of 4.
-    int multiplier = 1;
+    // Use a multiplier to encourage one run of 4, invalidate multiple runs of 4 and any runs of 5.
+    double multiplier = 1;
     if (part.cards.size() == 4) {
       if (!has4Run) {
         has4Run = true;
+        multiplier = 1.1;
       } else {
         multiplier = 0;
       }
@@ -76,9 +77,9 @@ public class ComplexScorer implements Scorer {
     int[] pointMap = POINT_MAP.get(type);
     int count = typeCounts.get(type);
     if (count < pointMap.length) {
-      return pointMap[count] * multiplier;
+      return (int)(pointMap[count] * multiplier);
     } else {
-      return pointMap[pointMap.length - 1] * multiplier;
+      return (int)(pointMap[pointMap.length - 1] * multiplier);
     }
   }
 
