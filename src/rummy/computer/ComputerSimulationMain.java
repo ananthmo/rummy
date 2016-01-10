@@ -14,10 +14,10 @@ public class ComputerSimulationMain {
 
   public static void main(String args[]) {
     int numComputers = 1;
-    int numDecks = 2;
-    int numJokers = 4;
+    int numDecks = 1;
+    int numJokers = 0;
 
-    Deck deck = new Deck(numDecks, numJokers);
+    Deck deck = new Deck(numDecks, numJokers, 9);
     deck.shuffle();
 
     List<Computer> computers = new ArrayList<>(numComputers);
@@ -31,6 +31,11 @@ public class ComputerSimulationMain {
     int turn = 1;
     while (true) {
       for (int i = 0; i < computers.size(); i++) {
+        if (deck.empty()) {
+          deck.reshuffleDiscardPile();
+          System.out.println("RESHUFFLING !!");
+        }
+
         Computer computer = computers.get(i);
         System.out.println(
             "T" + turn++ + " Computer: " + (i + 1) + ": " + computer.hand + " top:" + top);
@@ -40,6 +45,7 @@ public class ComputerSimulationMain {
           top = pickupResult.freeCard;
           System.out.println("drew top, discared " + top);
         } else {
+          deck.addToDiscard(top);
           Card deckCard = deck.draw();
           top = computer.drawAndDiscard(deckCard);
           System.out.println("drew from deck " + deckCard + ", discarded " + top);
