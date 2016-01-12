@@ -14,11 +14,12 @@ import rummy.core.Hand;
 import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
 import rummy.parts.Part;
-import rummy.parts.PartsTokenizer;
 import rummy.parts.PartsSolver;
 import rummy.parts.PartsSolver.Solution;
+import rummy.tokenizer.AbstractPartsTokenizer;
+import rummy.tokenizer.MultiTokenizer;
 
-public class PartsTokenizerTest {
+public class PartsSolverTest {
 
   @Test
   @Ignore
@@ -40,7 +41,7 @@ public class PartsTokenizerTest {
       Card.build(Face.FOUR, Suit.SPADES)
     );
 
-    List<Part> parts = new PartsTokenizer().tokenize(hand);
+    List<Part> parts = new MultiTokenizer().tokenize(hand);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -65,7 +66,7 @@ public class PartsTokenizerTest {
       Card.build(Face.TWO, Suit.SPADES)
     );
 
-    List<Part> parts = new PartsTokenizer().tokenize(hand);
+    List<Part> parts = new MultiTokenizer().tokenize(hand);
     System.out.println("qka parts:" + parts.toString());
   }
 
@@ -82,7 +83,7 @@ public class PartsTokenizerTest {
       Card.build(Face.SIX, Suit.HEARTS)
     );
 
-    List<Part> parts = new PartsTokenizer().tokenize(hand);
+    List<Part> parts = new MultiTokenizer().tokenize(hand);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -97,7 +98,7 @@ public class PartsTokenizerTest {
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
     System.out.println("hand:" + hand.cards);
-    List<Part> parts = new PartsTokenizer().tokenize(hand);
+    List<Part> parts = new MultiTokenizer().tokenize(hand);
     assertTrue(parts.size() > 0);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, true).findBestHand();
@@ -110,22 +111,22 @@ public class PartsTokenizerTest {
   //@Ignore
   public void testWinHands() {
     // Standard hand
-    //checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
+    checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
 
     // With jokers
-    //checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
+    checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
 
     // Double joker
-    //checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
+    checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
 
     // Need to insert joker in middle of run
-    //checkWin("A♥ 2♥ jk 4♥ 7♥ 8♥ 9♥ K♥ Q♥ J♥ 4♦ 4S 4H 6C", true);
+    checkWin("A♥ 2♥ jk 4♥ 7♥ 8♥ 9♥ K♥ Q♥ J♥ 4♦ 4S 4H 6C", true);
 
     // Large sequence
     checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk", true);
 
-    // Multiples of same card, with a run of 5. Need to debug why not passing.
-    // TODO: checkWin("A♥ 2♥ jk 2♥ 3♥ jk 3♥ 4♥ jk 4♥ 5♥ 5♥ 5♣ 9S", true);
+    // Multiples of same card
+    checkWin("7H 2♥ jk 2♥ 3♥ jk 3♥ 4♥ 8H 4♥ 5♥ 5♥ 5♣ 9S", true);
   }
 
   @Test
@@ -139,7 +140,7 @@ public class PartsTokenizerTest {
   private static void checkWin(String in, boolean extraCard) {
     System.out.println("checkWin");
     Hand hand = toHand(in);
-    List<Part> parts = new PartsTokenizer().tokenize(hand);
+    List<Part> parts = new MultiTokenizer().tokenize(hand);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
@@ -149,7 +150,7 @@ public class PartsTokenizerTest {
   private static void checkSolution(String in, boolean extraCard) {
     System.out.println("checkSolution");
     Hand hand = toHand(in);
-    List<Part> parts = new PartsTokenizer().tokenize(hand);
+    List<Part> parts = new MultiTokenizer().tokenize(hand);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);

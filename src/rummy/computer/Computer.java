@@ -6,10 +6,11 @@ import rummy.core.Card;
 import rummy.core.Deck;
 import rummy.core.Hand;
 import rummy.parts.Part;
-import rummy.parts.PartsTokenizer;
-import rummy.parts.ScoreUtil;
 import rummy.parts.PartsSolver;
 import rummy.parts.PartsSolver.Solution;
+import rummy.tokenizer.MultiTokenizer;
+import rummy.tokenizer.PartsTokenizer;
+import rummy.parts.ScoreUtil;
 
 /**
  * Represents a AI-controller player (eg computer or bot), than uses a back-tracking algorithm
@@ -78,8 +79,8 @@ public class Computer {
   }
 
   public Solution computeScore(Hand hand, boolean extraCard) {
-    PartsTokenizer partsTokenizer = new PartsTokenizer();
-    List<Part> parts = partsTokenizer.tokenize(hand);
+    PartsTokenizer tokenizer = new MultiTokenizer();
+    List<Part> parts = tokenizer.tokenize(hand);
     PartsSolver solver = new PartsSolver(parts, extraCard);
     return solver.findBestHand();
   }
