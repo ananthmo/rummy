@@ -14,7 +14,7 @@ import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
 import rummy.core.Hand;
 import rummy.parts.PartsSolver.Solution;
-import rummy.tokenizer.MultiTokenizer;
+import rummy.tokenizer.AggregateTokenizer;
 
 public class PartsSolverTest {
 
@@ -37,7 +37,7 @@ public class PartsSolverTest {
       Card.build(Face.FOUR, Suit.SPADES)
     );
 
-    List<Part> parts = new MultiTokenizer().tokenize(hand);
+    List<Part> parts = new AggregateTokenizer().tokenize(hand);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -61,7 +61,7 @@ public class PartsSolverTest {
       Card.build(Face.TWO, Suit.SPADES)
     );
 
-    List<Part> parts = new MultiTokenizer().tokenize(hand);
+    List<Part> parts = new AggregateTokenizer().tokenize(hand);
     System.out.println("qka parts:" + parts.toString());
   }
 
@@ -77,7 +77,7 @@ public class PartsSolverTest {
       Card.build(Face.SIX, Suit.HEARTS)
     );
 
-    List<Part> parts = new MultiTokenizer().tokenize(hand);
+    List<Part> parts = new AggregateTokenizer().tokenize(hand);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -90,7 +90,7 @@ public class PartsSolverTest {
   @Test
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
-    List<Part> parts = new MultiTokenizer().tokenize(hand);
+    List<Part> parts = new AggregateTokenizer().tokenize(hand);
     assertTrue(parts.size() > 0);
   }
 
@@ -124,7 +124,7 @@ public class PartsSolverTest {
   private static void checkWin(String in, boolean extraCard) {
     System.out.println("checkWin");
     Hand hand = toHand(in);
-    List<Part> parts = new MultiTokenizer().tokenize(hand);
+    List<Part> parts = new AggregateTokenizer().tokenize(hand);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
@@ -134,7 +134,7 @@ public class PartsSolverTest {
   private static void checkSolution(String in, boolean extraCard) {
     System.out.println("checkSolution");
     Hand hand = toHand(in);
-    List<Part> parts = new MultiTokenizer().tokenize(hand);
+    List<Part> parts = new AggregateTokenizer().tokenize(hand);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);

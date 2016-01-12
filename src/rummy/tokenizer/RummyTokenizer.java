@@ -16,7 +16,7 @@ import rummy.parts.Part;
 /**
  * Generates rummy-related {@link Part} tokens for a given hand.
  */
-public class RummyTokenizer extends AbstractPartsTokenizer {
+public class RummyTokenizer extends MultiDeckTokenizer {
 
   private static final Comparator<Card> COMPARE_BY_VALUE = new Comparator<Card>() {
     @Override

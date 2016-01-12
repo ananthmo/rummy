@@ -9,7 +9,7 @@ import rummy.parts.Part;
 /**
  * Generates the {@link Part} single tokens for a given hand.
  */
-public class SinglesTokenizer extends AbstractPartsTokenizer {
+public class SinglesTokenizer extends MultiDeckTokenizer {
 
   @Override
   public List<Part> generateParts(List<Card> cards, List<Card> jokers) {

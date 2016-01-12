@@ -9,10 +9,11 @@ import rummy.core.Hand;
 import rummy.parts.Part;
 
 /**
- * Base class for tokenizing a hand. Provides helper methods, in particular {@link #expandCardSets}
- * should be used manage cards from multiple decks.
+ * Base class for tokenizing a hand, capable of handling more than one deck. Provides helper
+ * methods, in particular {@link #expandCardSets} can be used for handling multiple sets of the
+ * same card.
  */
-public abstract class AbstractPartsTokenizer implements PartsTokenizer {
+public abstract class MultiDeckTokenizer implements PartsTokenizer {
 
   protected abstract List<Part> generateParts(List<Card> cards, List<Card> jokers);
 

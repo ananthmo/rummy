@@ -9,13 +9,13 @@ import rummy.parts.Part;
 /**
  * Aggregates together all the different tokenizers.
  */
-public class MultiTokenizer implements PartsTokenizer {
+public class AggregateTokenizer implements PartsTokenizer {
 
   private final PartsTokenizer rummyTokenizer;
   private final PartsTokenizer setTokenizer;
   private final PartsTokenizer singlesTokenizer;
 
-  public MultiTokenizer() {
+  public AggregateTokenizer() {
     rummyTokenizer = new RummyTokenizer();
     setTokenizer = new SetTokenizer();
     singlesTokenizer = new SinglesTokenizer();

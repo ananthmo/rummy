@@ -12,7 +12,7 @@ import rummy.parts.Part;
 /**
  * Generates set-related {@link Part} tokens for a given hand.
  */
-public class SetTokenizer extends AbstractPartsTokenizer {
+public class SetTokenizer extends MultiDeckTokenizer {
 
   private static final Comparator<Card> COMPARE_BY_FACE = new Comparator<Card>() {
     @Override

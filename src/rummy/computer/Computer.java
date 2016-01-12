@@ -8,7 +8,7 @@ import rummy.core.Hand;
 import rummy.parts.Part;
 import rummy.parts.PartsSolver;
 import rummy.parts.PartsSolver.Solution;
-import rummy.tokenizer.MultiTokenizer;
+import rummy.tokenizer.AggregateTokenizer;
 import rummy.tokenizer.PartsTokenizer;
 import rummy.parts.ScoreUtil;
 
@@ -79,7 +79,7 @@ public class Computer {
   }
 
   public Solution computeScore(Hand hand, boolean extraCard) {
-    PartsTokenizer tokenizer = new MultiTokenizer();
+    PartsTokenizer tokenizer = new AggregateTokenizer();
     List<Part> parts = tokenizer.tokenize(hand);
     PartsSolver solver = new PartsSolver(parts, extraCard);
     return solver.findBestHand();
