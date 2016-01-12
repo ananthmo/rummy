@@ -6,6 +6,9 @@ import java.util.List;
 import rummy.core.Hand;
 import rummy.parts.Part;
 
+/**
+ * Aggregates together all the different tokenizers.
+ */
 public class MultiTokenizer implements PartsTokenizer {
 
   private final PartsTokenizer rummyTokenizer;

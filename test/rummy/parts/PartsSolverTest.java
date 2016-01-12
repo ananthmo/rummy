@@ -1,28 +1,24 @@
 package rummy.parts;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import rummy.core.Card;
-import rummy.core.Hand;
 import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
-import rummy.parts.Part;
-import rummy.parts.PartsSolver;
+import rummy.core.Hand;
 import rummy.parts.PartsSolver.Solution;
-import rummy.tokenizer.AbstractPartsTokenizer;
 import rummy.tokenizer.MultiTokenizer;
 
 public class PartsSolverTest {
 
   @Test
-  @Ignore
   public void testFullHand() {
     Hand hand = new Hand(
       Card.build(Face.TWO, Suit.HEARTS),
@@ -54,7 +50,6 @@ public class PartsSolverTest {
   }
 
   @Test
-  @Ignore
   public void testQkaRun() {
     Hand hand = new Hand(
       Card.build(Face.QUEEN, Suit.HEARTS),
@@ -71,7 +66,6 @@ public class PartsSolverTest {
   }
 
   @Test
-  @Ignore
   public void testSparseHand() {
     Hand hand = new Hand(
       Card.build(Face.TWO, Suit.HEARTS),
@@ -94,43 +88,33 @@ public class PartsSolverTest {
   }
 
   @Test
-  @Ignore
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
-    System.out.println("hand:" + hand.cards);
     List<Part> parts = new MultiTokenizer().tokenize(hand);
     assertTrue(parts.size() > 0);
-    System.out.println(parts);
-    Solution solution = new PartsSolver(parts, true).findBestHand();
-    //assertNotNull(solution.parts);
-    System.out.println("solution:" + solution.parts);
-    System.out.println(solution.score);
   }
 
   @Test
-  //@Ignore
   public void testWinHands() {
     // Standard hand
     checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
-
     // With jokers
     checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
-
     // Double joker
     checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
-
+    checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk", false);
     // Need to insert joker in middle of run
     checkWin("A♥ 2♥ jk 4♥ 7♥ 8♥ 9♥ K♥ Q♥ J♥ 4♦ 4S 4H 6C", true);
-
+    checkWin("2♥ jk 4♥ 5H 7♥ 8♥ 9♥ K♥ Q♥ J♥ 4♦ 4S 4H 6C", true);
     // Large sequence
     checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk", true);
+    checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ QH KH AH", true);
 
     // Multiples of same card
     checkWin("7H 2♥ jk 2♥ 3♥ jk 3♥ 4♥ 8H 4♥ 5♥ 5♥ 5♣ 9S", true);
   }
 
   @Test
-  @Ignore
   public void testSparseHands() {
     checkSolution("J♣ 6♠ K♠ jk 2♠ jk 10♣ Q♠ 3♣ J♠ Q♦ 5♣ 8♠ 10S", true);
     checkSolution("A♣ A♣ 3♠ 3♠ 5♠ 5♠ 7♣ 7♣ 9♣ 9♣ J♣ J♣ K♠ K♠", true);

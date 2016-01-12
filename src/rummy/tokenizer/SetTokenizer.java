@@ -2,7 +2,9 @@ package rummy.tokenizer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rummy.core.Card;
 import rummy.parts.Part;
@@ -21,13 +23,14 @@ public class SetTokenizer extends AbstractPartsTokenizer {
 
   /**
    * Finds the set-related part types of this hand of cards. Sorts the cards by face, then iterates
-   * through, keeping a running list of cards with same face value.
+   * through, keeping a running list of cards with same face value. Those are then converted to
+   * set parts.
    */
   @Override
   public List<Part> generateParts(List<Card> cards, List<Card> jokers) {
     cards.sort(COMPARE_BY_FACE);
     List<Part> parts = new ArrayList<>();
-    List<List<Card>> runCardSets = new ArrayList<>();
+    List<Set<Card>> runCardSets = new ArrayList<>();
     Card prev = null;
     for (int i = 0; i < cards.size(); i++) {
       Card card = cards.get(i);
@@ -44,7 +47,7 @@ public class SetTokenizer extends AbstractPartsTokenizer {
       if (prev != null && card.value == prev.value) {
         runCardSets.get(runCardSets.size() - 1).add(card);
       } else {
-        runCardSets.add(new ArrayList<>());
+        runCardSets.add(new HashSet<>());
         runCardSets.get(runCardSets.size() - 1).add(card);
       }
 

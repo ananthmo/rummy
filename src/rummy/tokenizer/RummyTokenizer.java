@@ -3,8 +3,10 @@ package rummy.tokenizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import rummy.core.Card;
@@ -40,8 +42,8 @@ public class RummyTokenizer extends AbstractPartsTokenizer {
     qkaStacks.put(Face.QUEEN, new Stack<>());
 
     Card prev = null;
-    List<List<Card>> prevCardSets = new ArrayList<>();
-    List<List<Card>> cardSets = new ArrayList<>();
+    List<Set<Card>> prevCardSets = new ArrayList<>();
+    List<Set<Card>> cardSets = new ArrayList<>();
     for (int i = 0; i < cards.size(); i++) {
       Card card = cards.get(i);
 
@@ -50,12 +52,11 @@ public class RummyTokenizer extends AbstractPartsTokenizer {
           && (card.suit != prev.suit || card.face.ordinal() != prev.face.ordinal() + 1)
           && (card.value != prev.value))
           || cardSets.size() == 5) {
-        List<List<Card>> rummyRuns = expandCardSets(cardSets, 2);
-        parts.addAll(rummyRunsToParts(rummyRuns, jokers));
-        parts.addAll(combineRummyRunsWithJoker(prevCardSets, cardSets, jokers));
+        // Convert the card sets into parts
+        parts.addAll(partsFromCardSets(prevCardSets, cardSets, jokers));
 
+        // Reset the sets
         prevCardSets = cardSets;
-        //cardSets.clear();
         cardSets = new ArrayList<>();
         if (card.suit != prev.suit) {
           // Reset the QKA stacks only on suit change
@@ -84,20 +85,29 @@ public class RummyTokenizer extends AbstractPartsTokenizer {
       if (prev != null && card.value == prev.value && !cardSets.isEmpty()) {
         cardSets.get(cardSets.size() - 1).add(card);
       } else {
-        cardSets.add(new ArrayList<>());
+        cardSets.add(new HashSet<>());
         cardSets.get(cardSets.size() - 1).add(card);
       }
 
       prev = card;
     }
+    parts.addAll(partsFromCardSets(prevCardSets, cardSets, jokers));
+    return parts;
+  }
 
+  private static List<Part> partsFromCardSets(
+      List<Set<Card>> prevCardSets, List<Set<Card>> runningCardSets, List<Card> jokers) {
+    List<Part> parts = new ArrayList<>();
+    List<List<Card>> rummyRuns = expandCardSets(runningCardSets, 2);
+    parts.addAll(rummyRunsToParts(rummyRuns, jokers));
+    parts.addAll(combineRummyRunsWithJoker(prevCardSets, runningCardSets, jokers));
     return parts;
   }
 
   // Converts a list of rummyRuns to rummy parts.
   // Eg. Given [2H 3H],[2H 3H 4Ha],[2Hb 3H 4Hb], return NatRummy[2H 3H 4Ha], NatRummy[2H 3H 4Hb],
   // PartialRummy[2H 3H].
-  List<Part> rummyRunsToParts(List<List<Card>> rummyRuns, List<Card> jokers) {
+  static List<Part> rummyRunsToParts(List<List<Card>> rummyRuns, List<Card> jokers) {
     List<Part> parts = new ArrayList<>();
     for (List<Card> run : rummyRuns) {
       if (run.size() >= 3) {
@@ -120,35 +130,37 @@ public class RummyTokenizer extends AbstractPartsTokenizer {
     return parts;
   }
 
-  // Set if jokers can be used to combine run sets. Eg [[2Ha 2Hb],[3H]] + [[5H],[6H]] + [jk1] can
+  // Set if jokers can be used to combine run sets. Eg [(2Ha 2Hb)],(3H)] + [(5H),(6H)] + [jk1] can
   // form rummys [2Ha-3H-jk1-5H, 2Hb-3H-jk1-5H].
-  List<Part> combineRummyRunsWithJoker(
-      List<List<Card>> cardSets1, List<List<Card>> cardSets2, List<Card> jokers) {
+  static List<Part> combineRummyRunsWithJoker(
+      List<Set<Card>> cardSets1, List<Set<Card>> cardSets2, List<Card> jokers) {
     List<Part> parts = new ArrayList<>();
-    if (cardSets1 == null || cardSets2 == null || cardSets1.isEmpty() || cardSets2.isEmpty()) {
+    if (jokers.isEmpty()
+        || cardSets1 == null
+        || cardSets2 == null
+        || cardSets1.isEmpty()
+        || cardSets2.isEmpty()) {
       return parts;
     }
 
     // Check that two sets can join to form a rummy with a joker inserted in-between
-    Card set1Last = cardSets1.get(cardSets1.size() - 1).get(0);
-    Card set2First = cardSets2.get(0).get(0);
-    if (jokers.size() == 0
-        || set1Last.suit != set2First.suit
-        || set1Last.value + 1 != set2First.value - 1) {
+    Card sets1Last = cardSets1.get(cardSets1.size() - 1).iterator().next();
+    Card sets2First = cardSets2.get(0).iterator().next();
+    if (sets1Last.suit != sets2First.suit || sets1Last.value + 1 != sets2First.value - 1) {
       return parts;
     }
 
     // Grab the last 2 sets from set 1, and first 2 sets from set 2.
-    int set1Size = cardSets1.size();
-    int set2Size = cardSets2.size();
-    List<List<Card>> sets1Tail = cardSets1.subList(Math.max(0, set1Size - 2), set1Size);
-    List<List<Card>> sets2Head = cardSets2.subList(0, Math.min(set2Size, 2));
+    int sets1Size = cardSets1.size();
+    int sets2Size = cardSets2.size();
+    List<Set<Card>> sets1Tail = cardSets1.subList(Math.max(0, sets1Size - 2), sets1Size);
+    List<Set<Card>> sets2Head = cardSets2.subList(0, Math.min(sets2Size, 2));
 
     // Create a new card set with jokers in the middle
-    List<List<Card>> cardSetsWithJoker = new ArrayList<>();
+    List<Set<Card>> cardSetsWithJoker = new ArrayList<>();
     cardSetsWithJoker.addAll(sets1Tail);
-    List<List<Card>> jokerSet = new ArrayList<>();
-    jokerSet.add(jokers);
+    List<Set<Card>> jokerSet = new ArrayList<>();
+    jokerSet.add(new HashSet<>(jokers));
     cardSetsWithJoker.addAll(jokerSet);
     cardSetsWithJoker.addAll(sets2Head);
 
