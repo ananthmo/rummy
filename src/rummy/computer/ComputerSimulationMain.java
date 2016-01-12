@@ -14,8 +14,8 @@ public class ComputerSimulationMain {
 
   public static void main(String args[]) {
     int numComputers = 1;
-    int numDecks = 1;
-    int numJokers = 2;
+    int numDecks = 2;
+    int numJokers = 4;
 
     Deck deck = new Deck(numDecks, numJokers);
     deck.shuffle();

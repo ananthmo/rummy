@@ -86,9 +86,10 @@ public class PartsTokenizer {
       Card card = cards.get(i);
 
       // This rummy run has ended, convert the run sets into parts.
-      if (prev != null
+      if ((prev != null
           && (card.suit != prev.suit || card.face.ordinal() != prev.face.ordinal() + 1)
-          && (card.value != prev.value)) {
+          && (card.value != prev.value))
+          || cardSets.size() == 5) {
         List<List<Card>> rummyRuns = expandCardSets(cardSets, 2);
         parts.addAll(rummyRunsToParts(rummyRuns));
         parts.addAll(combineRummyRunsWithJoker(prevCardSets, cardSets));

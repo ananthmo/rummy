@@ -122,11 +122,10 @@ public class PartsTokenizerTest {
     //checkWin("A♥ 2♥ jk 4♥ 7♥ 8♥ 9♥ K♥ Q♥ J♥ 4♦ 4S 4H 6C", true);
 
     // Large sequence
-    // TODO: checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk", true);
+    checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk", true);
 
     // Multiples of same card, with a run of 5. Need to debug why not passing.
-    // TODO:
-    checkWin("A♥ 2♥ jk 2♥ 3♥ jk 3♥ 4♥ jk 4♥ 5♥ 5♥ 5♣ 9S", true);
+    // TODO: checkWin("A♥ 2♥ jk 2♥ 3♥ jk 3♥ 4♥ jk 4♥ 5♥ 5♥ 5♣ 9S", true);
   }
 
   @Test
