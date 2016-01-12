@@ -18,7 +18,7 @@ public class Deck {
    * Constructs a deck of 52-cards, one card of each face/suit pair.
    */
   public Deck(int numDecks, int numJokers, Integer seed) {
-    this.random = new Random(seed);
+    this.random = (seed != null) ? new Random(seed) : new Random();
     this.cards = new Stack<>();
     this.discards = new Stack<>();
     for (int i = 0; i < numDecks; i++){

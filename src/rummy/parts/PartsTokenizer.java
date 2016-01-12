@@ -80,6 +80,7 @@ public class PartsTokenizer {
     qkaStacks.put(Face.QUEEN, new Stack<>());
 
     Card prev = null;
+    List<List<Card>> prevCardSets = new ArrayList<>();
     List<List<Card>> cardSets = new ArrayList<>();
     for (int i = 0; i < cards.size(); i++) {
       Card card = cards.get(i);
@@ -88,10 +89,13 @@ public class PartsTokenizer {
       if (prev != null
           && (card.suit != prev.suit || card.face.ordinal() != prev.face.ordinal() + 1)
           && (card.value != prev.value)) {
-        List<List<Card>> rummyRuns = expandCardSets(cardSets);
+        List<List<Card>> rummyRuns = expandCardSets(cardSets, 2);
         parts.addAll(rummyRunsToParts(rummyRuns));
+        parts.addAll(combineRummyRunsWithJoker(prevCardSets, cardSets));
 
-        cardSets.clear();
+        prevCardSets = cardSets;
+        //cardSets.clear();
+        cardSets = new ArrayList<>();
         if (card.suit != prev.suit) {
           // Reset the QKA stacks only on suit change
           for (Stack<Card> stack : qkaStacks.values()) {
@@ -132,7 +136,7 @@ public class PartsTokenizer {
   // Given a list of cardSets, multiplies them in sequence. For instance if the user has a run
   // of 2H 2H 3H 3H 4H, which froms the card set [2Ha 2Hb] [3Ha 3Hb] [4H], it expands to 4 runs
   // [2Ha 3Ha 4H],[2Ha 3Hb 4H],[2Hb 3Ha 4H],[2Hb 3Hb 4H].
-  private static List<List<Card>> expandCardSets(List<List<Card>> cardSets) {
+  private static List<List<Card>> expandCardSets(List<List<Card>> cardSets, int minRunSize) {
     List<List<Card>> runs = new ArrayList<>();
     List<List<Card>> selectedRuns = new ArrayList<>();
     for (List<Card> cardSet : cardSets) {
@@ -153,7 +157,9 @@ public class PartsTokenizer {
             newRun.addAll(run);
             newRun.add(card);
             expandedRuns.add(newRun);
-            selectedRuns.add(newRun);
+            if (newRun.size() >= minRunSize) {
+              selectedRuns.add(newRun);
+            }
           }
         }
         runs = expandedRuns;
@@ -190,7 +196,7 @@ public class PartsTokenizer {
 
       // This set run as ended, convert the run into set parts.
       if (prev != null && card.face != prev.face && card.value != prev.value) {
-        List<List<Card>> setRuns = expandCardSets(runCardSets);
+        List<List<Card>> setRuns = expandCardSets(runCardSets ,2);
         parts.addAll(setRunsToParts(setRuns));
         runCardSets.clear();
       }
@@ -207,7 +213,7 @@ public class PartsTokenizer {
       prev = card;
     }
 
-    List<List<Card>> setRuns = expandCardSets(runCardSets);
+    List<List<Card>> setRuns = expandCardSets(runCardSets, 2);
     parts.addAll(setRunsToParts(setRuns));
     return parts;
   }
@@ -234,6 +240,45 @@ public class PartsTokenizer {
           parts.add(Part.rummyWithJoker(run, jokers.get(0), jokers.get(1)));
         }
       }
+    }
+    return parts;
+  }
+
+  // Set if jokers can be used to combine run sets. Eg [[AH],[2H],[3H]] + [[5H],[6H]] can form
+  // rummys [2H-3H-jk-5H, 3H-jk-5H-6H, 3H-jk-5H].
+  List<Part> combineRummyRunsWithJoker(List<List<Card>> cardSet1, List<List<Card>> cardSet2) {
+    List<Part> parts = new ArrayList<>();
+    if (cardSet1 == null || cardSet2 == null || cardSet1.isEmpty() || cardSet2.isEmpty()) {
+      return parts;
+    }
+
+    // Check that two sets can join to form a rummy with a joker inserted inbetween
+    Card set1Last = cardSet1.get(cardSet1.size() - 1).get(0);
+    Card set2First = cardSet2.get(0).get(0);
+    if (jokers.size() == 0
+        || set1Last.suit != set2First.suit
+        || set1Last.value + 1 != set2First.value - 1) {
+      return parts;
+    }
+
+    // Grab the last 2 sets from set 1, and first 2 sets from set 2.
+    int set1Size = cardSet1.size();
+    int set2Size = cardSet2.size();
+    List<List<Card>> set1Tail = cardSet1.subList(Math.max(0, set1Size - 2), set1Size);
+    List<List<Card>> set2Head = cardSet2.subList(0, Math.min(set2Size, 2));
+
+    // Create a new card set with jokers in the middle
+    List<List<Card>> cardSetWithJoker = new ArrayList<>();
+    cardSetWithJoker.addAll(set1Tail);
+    List<List<Card>> jokerSet = new ArrayList<>();
+    jokerSet.add(jokers);
+    cardSetWithJoker.addAll(jokerSet);
+    cardSetWithJoker.addAll(set2Head);
+
+    // Convert the card set with jokers to rummys
+    List<List<Card>> jokerRuns = expandCardSets(cardSetWithJoker, 3);
+    for (List<Card> jokerRun : jokerRuns) {
+      parts.add(Part.rummyWithJoker(jokerRun));
     }
     return parts;
   }

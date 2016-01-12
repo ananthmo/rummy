@@ -21,7 +21,7 @@ import rummy.parts.PartsSolver.Solution;
 public class PartsTokenizerTest {
 
   @Test
-  //@Ignore
+  @Ignore
   public void testFullHand() {
     Hand hand = new Hand(
       Card.build(Face.TWO, Suit.HEARTS),
@@ -53,7 +53,7 @@ public class PartsTokenizerTest {
   }
 
   @Test
-  //@Ignore
+  @Ignore
   public void testQkaRun() {
     Hand hand = new Hand(
       Card.build(Face.QUEEN, Suit.HEARTS),
@@ -70,7 +70,7 @@ public class PartsTokenizerTest {
   }
 
   @Test
-  //@Ignore
+  @Ignore
   public void testSparseHand() {
     Hand hand = new Hand(
       Card.build(Face.TWO, Suit.HEARTS),
@@ -93,7 +93,7 @@ public class PartsTokenizerTest {
   }
 
   @Test
-  //@Ignore
+  @Ignore
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
     System.out.println("hand:" + hand.cards);
@@ -110,23 +110,27 @@ public class PartsTokenizerTest {
   //@Ignore
   public void testWinHands() {
     // Standard hand
-    checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
+    //checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
 
     // With jokers
-    checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
+    //checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
 
     // Double joker
-    checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
+    //checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
 
     // Need to insert joker in middle of run
-    // TODO: checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk 6H", true);
+    //checkWin("A♥ 2♥ jk 4♥ 7♥ 8♥ 9♥ K♥ Q♥ J♥ 4♦ 4S 4H 6C", true);
+
+    // Large sequence
+    // TODO: checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk", true);
 
     // Multiples of same card, with a run of 5. Need to debug why not passing.
-    // TODO: checkWin("A♥ 2♥ jk 2♥ 3♥ jk 3♥ 4♥ jk 4♥ 5♥ 5♥ 5♣ 9S", true);
+    // TODO:
+    checkWin("A♥ 2♥ jk 2♥ 3♥ jk 3♥ 4♥ jk 4♥ 5♥ 5♥ 5♣ 9S", true);
   }
 
   @Test
-  //@Ignore
+  @Ignore
   public void testSparseHands() {
     checkSolution("J♣ 6♠ K♠ jk 2♠ jk 10♣ Q♠ 3♣ J♠ Q♦ 5♣ 8♠ 10S", true);
     checkSolution("A♣ A♣ 3♠ 3♠ 5♠ 5♠ 7♣ 7♣ 9♣ 9♣ J♣ J♣ K♠ K♠", true);
