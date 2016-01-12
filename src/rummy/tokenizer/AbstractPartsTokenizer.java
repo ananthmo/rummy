@@ -45,25 +45,18 @@ public abstract class AbstractPartsTokenizer implements PartsTokenizer {
   // had a run of [2Ha 2Hb 3Ha 3Hb 4H], this forms the card set list [[2Ha 2Hb] [3Ha 3Hb] [4H]], it
   // expands to 4 runs [[2Ha 3Ha 4H],[2Ha 3Hb 4H],[2Hb 3Ha 4H],[2Hb 3Hb 4H]].
   protected static List<List<Card>> expandCardSets(List<Set<Card>> cardSets, int minRunSize) {
+    // Expand the card sets
     List<List<Card>> runs = new ArrayList<>();
-    List<List<Card>> runsWithMinSize = new ArrayList<>();
+    runs.add(new ArrayList<>());
     for (Set<Card> cardSet : cardSets) {
-      if (runs.isEmpty()) {
-        // Initialize run to first card set
-        for (Card card : cardSet) {
-          List<Card> singleCard = new ArrayList<Card>();
-          singleCard.add(card);
-          runs.add(singleCard);
-        }
-      } else {
-        // Multiply the run by this card set, keep track of qualifying runs.
-        List<List<Card>> expandedRuns = multiply(runs, cardSet);
-        for (List<Card> newRun : expandedRuns) {
-          if (newRun.size() >= minRunSize) {
-            runsWithMinSize.add(newRun);
-          }
-        }
-        runs = expandedRuns;
+      runs = multiply(runs, cardSet);
+    }
+
+    // Pick out appropriate runs.
+    List<List<Card>> runsWithMinSize = new ArrayList<>();
+    for (List<Card> run : runs) {
+      for (int i = run.size(); i >= minRunSize; i--) {
+        runsWithMinSize.add(run.subList(0, i));
       }
     }
     return runsWithMinSize;
