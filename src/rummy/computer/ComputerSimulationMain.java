@@ -5,6 +5,7 @@ import java.util.List;
 
 import rummy.computer.Computer.PickupResult;
 import rummy.core.Card;
+import rummy.core.Card.Face;
 import rummy.core.Deck;
 
 /**
@@ -13,20 +14,21 @@ import rummy.core.Deck;
 public class ComputerSimulationMain {
 
   public static void main(String args[]) {
-    int numComputers = 1;
-    int numDecks = 1;
-    int numJokers = 2;
+    int numComputers = 3;
+    int numDecks = 2;
+    int numJokers = 4;
 
-    Deck deck = new Deck(numDecks, numJokers);
+    Deck deck = new Deck(numDecks, numJokers, 5);
     deck.shuffle();
+    Face faceJoker = deck.draw().face;
+    System.out.println("Face joker: " + faceJoker);
 
     List<Computer> computers = new ArrayList<>(numComputers);
     for (int i = 0; i < numComputers; i++) {
-      Computer computer = new Computer();
+      Computer computer = new Computer(faceJoker);
       computer.drawNewHand(deck);
       computers.add(computer);
     }
-    // TODO: add AI support for drawing a face joker
 
     Card top = deck.draw();
     int turn = 1;

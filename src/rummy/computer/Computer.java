@@ -1,16 +1,17 @@
 package rummy.computer;
 
-import java.util.List;
+import java.util.Set;
 
 import rummy.core.Card;
+import rummy.core.Card.Face;
 import rummy.core.Deck;
 import rummy.core.Hand;
 import rummy.parts.Part;
 import rummy.parts.PartsSolver;
 import rummy.parts.PartsSolver.Solution;
+import rummy.parts.ScoreUtil;
 import rummy.tokenizer.AggregateTokenizer;
 import rummy.tokenizer.PartsTokenizer;
-import rummy.parts.ScoreUtil;
 
 /**
  * Represents a AI-controller player (eg computer or bot), than uses a back-tracking algorithm
@@ -21,8 +22,10 @@ public class Computer {
   Hand hand;
   int currentHandScore = -99999;
   int currentPoints = ScoreUtil.FULL_HAND_POINTS;
+  final Face faceJoker;
 
-  public Computer() {
+  public Computer(Face faceJoker) {
+    this.faceJoker = faceJoker;
   }
 
   public void drawNewHand(Deck deck) {
@@ -80,7 +83,7 @@ public class Computer {
 
   public Solution computeScore(Hand hand, boolean extraCard) {
     PartsTokenizer tokenizer = new AggregateTokenizer();
-    List<Part> parts = tokenizer.tokenize(hand);
+    Set<Part> parts = tokenizer.tokenize(hand, faceJoker);
     PartsSolver solver = new PartsSolver(parts, extraCard);
     return solver.findBestHand();
   }

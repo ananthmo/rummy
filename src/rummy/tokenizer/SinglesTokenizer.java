@@ -1,7 +1,8 @@
 package rummy.tokenizer;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rummy.core.Card;
 import rummy.parts.Part;
@@ -12,8 +13,8 @@ import rummy.parts.Part;
 public class SinglesTokenizer extends MultiDeckTokenizer {
 
   @Override
-  public List<Part> generateParts(List<Card> cards, List<Card> jokers) {
-    List<Part> parts = new ArrayList<>(cards.size() + jokers.size());
+  public Set<Part> generateParts(List<Card> cards, List<Card> jokers) {
+    Set<Part> parts = new HashSet<>(cards.size() + jokers.size());
     for (Card card : cards) {
       parts.add(Part.single(card));
     }

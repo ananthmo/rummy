@@ -2,6 +2,7 @@ package rummy.tokenizer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,9 +28,9 @@ public class SetTokenizer extends MultiDeckTokenizer {
    * set parts.
    */
   @Override
-  public List<Part> generateParts(List<Card> cards, List<Card> jokers) {
+  public Set<Part> generateParts(List<Card> cards, List<Card> jokers) {
     cards.sort(COMPARE_BY_FACE);
-    List<Part> parts = new ArrayList<>();
+    Set<Part> parts = new HashSet<>();
     List<Set<Card>> runCardSets = new ArrayList<>();
     Card prev = null;
     for (int i = 0; i < cards.size(); i++) {

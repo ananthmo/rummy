@@ -1,7 +1,8 @@
 package rummy.tokenizer;
 
-import java.util.List;
+import java.util.Set;
 
+import rummy.core.Card.Face;
 import rummy.core.Hand;
 import rummy.parts.Part;
 import rummy.parts.PartsSolver;
@@ -16,5 +17,5 @@ public interface PartsTokenizer {
   /**
    * Generate an exhaustive list of part tokens for this hand.
    */
-  List<Part> tokenize(Hand hand);
+  Set<Part> tokenize(Hand hand, Face faceJoker);
 }

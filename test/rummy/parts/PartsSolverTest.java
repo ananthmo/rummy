@@ -4,8 +4,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class PartsSolverTest {
       Card.build(Face.FOUR, Suit.SPADES)
     );
 
-    List<Part> parts = new AggregateTokenizer().tokenize(hand);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -61,7 +61,7 @@ public class PartsSolverTest {
       Card.build(Face.TWO, Suit.SPADES)
     );
 
-    List<Part> parts = new AggregateTokenizer().tokenize(hand);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println("qka parts:" + parts.toString());
   }
 
@@ -77,7 +77,7 @@ public class PartsSolverTest {
       Card.build(Face.SIX, Suit.HEARTS)
     );
 
-    List<Part> parts = new AggregateTokenizer().tokenize(hand);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
@@ -90,7 +90,7 @@ public class PartsSolverTest {
   @Test
   public void testRun() {
     Hand hand = toHand("5♦ 6♦ 7♦ 10♦ J♦ Q♦ A♠ 2♠ 3♠ 5♣ 6♣ 7♣ jk QS");
-    List<Part> parts = new AggregateTokenizer().tokenize(hand);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     assertTrue(parts.size() > 0);
   }
 
@@ -100,6 +100,9 @@ public class PartsSolverTest {
     checkWin("9H 9S 3H 3D 4D 5D 9D 9C AH AS AD 4H 5H", false);
     // With jokers
     checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD jk AS", true);
+    // With face jokers
+    checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS QS KH KD 6C AS", true, Face.SIX);
+    checkWin("2H 3H 4H 5H 7S 7C 7D 10S JS jk KH KD KC AS", true, Face.THREE);
     // Double joker
     checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk 6H", true);
     checkWin("7♦ 8♦ 9♦ A♣ 2♣ 3♣ 4♣ 2♠ 3♠ jk 10♦ 10♣ jk", false);
@@ -109,7 +112,6 @@ public class PartsSolverTest {
     // Large sequence
     checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ 4♦ jk jk", true);
     checkWin("A♥ 2♥ 3♥ 4♥ 5♥ 6H 7♥ 8♥ Q♥ 10♥ J♥ QH KH AH", true);
-
     // Multiples of same card
     checkWin("7H 2♥ jk 2♥ 3♥ jk 3♥ 4♥ 8H 4♥ 5♥ 5♥ 5♣ 9S", true);
   }
@@ -121,20 +123,24 @@ public class PartsSolverTest {
     checkSolution("A♣ 2♣ 3♣ 8♦ 9♦ jk5 Q♥ Q♦ Q♣ 10♥ 8♠ 10♥ A♦ KC", true);
   }
 
-  private static void checkWin(String in, boolean extraCard) {
+  private static void checkWin(String in, boolean extraCard, Face faceJoker) {
     System.out.println("checkWin");
     Hand hand = toHand(in);
-    List<Part> parts = new AggregateTokenizer().tokenize(hand);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, faceJoker);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.isWinning);
   }
 
+  private static void checkWin(String in, boolean extraCard) {
+    checkWin(in, extraCard, null /* faceJoker */);
+  }
+
   private static void checkSolution(String in, boolean extraCard) {
     System.out.println("checkSolution");
     Hand hand = toHand(in);
-    List<Part> parts = new AggregateTokenizer().tokenize(hand);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println(parts);
     Solution solution = new PartsSolver(parts, extraCard).findBestHand();
     System.out.println(solution.parts);

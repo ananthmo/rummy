@@ -1,8 +1,12 @@
 package rummy.tokenizer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import rummy.core.Card;
+import rummy.core.Card.Face;
 import rummy.core.Hand;
 import rummy.parts.Part;
 
@@ -22,11 +26,11 @@ public class AggregateTokenizer implements PartsTokenizer {
   }
 
   @Override
-  public List<Part> tokenize(Hand hand) {
-    List<Part> parts = new ArrayList<>();
-    parts.addAll(rummyTokenizer.tokenize(hand));
-    parts.addAll(setTokenizer.tokenize(hand));
-    parts.addAll(singlesTokenizer.tokenize(hand));
+  public Set<Part> tokenize(Hand hand, Face faceJoker) {
+    Set<Part> parts = new HashSet<>();
+    parts.addAll(rummyTokenizer.tokenize(hand, faceJoker));
+    parts.addAll(setTokenizer.tokenize(hand, faceJoker));
+    parts.addAll(singlesTokenizer.tokenize(hand, faceJoker));
     return parts;
   }
 }

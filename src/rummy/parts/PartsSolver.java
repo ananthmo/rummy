@@ -46,8 +46,9 @@ public class PartsSolver {
   };
 
   // Allows for a different handSize just for testing purposes
-  PartsSolver(int handSize, List<Part> parts, boolean extraCard) {
-    this.parts = parts;
+  PartsSolver(int handSize, Set<Part> parts, boolean extraCard) {
+    this.parts = new ArrayList<>();
+    this.parts.addAll(parts);
     this.handSize = handSize;
     this.extraCard = extraCard;
     this.bitIdxToPart = new HashMap<>();
@@ -58,7 +59,7 @@ public class PartsSolver {
     initializeBitMaps();
   }
 
-  public PartsSolver(List<Part> parts, boolean extraCard) {
+  public PartsSolver(Set<Part> parts, boolean extraCard) {
     this(DEFAULT_HAND_SIZE, parts, extraCard);
   }
 

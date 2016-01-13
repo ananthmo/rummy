@@ -21,7 +21,7 @@ public class ComplexScorer implements Scorer {
   static {
     POINT_MAP.put(PartType.NATURAL_RUMMY, new int[] {1000, 500, 500});
     POINT_MAP.put(PartType.RUMMY, new int[] {300, 300, 300});
-    POINT_MAP.put(PartType.SET, new int[] {200, 200, 0});
+    POINT_MAP.put(PartType.SET, new int[] {200, 100, -1000});
     POINT_MAP.put(PartType.PARTIAL_RUMMY, new int[] {75, 75, 75});
     POINT_MAP.put(PartType.PARTIAL_SET, new int[] {50, 50, 25});
   }

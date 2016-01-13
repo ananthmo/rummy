@@ -3,6 +3,7 @@ package rummy.tokenizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +33,8 @@ public class RummyTokenizer extends MultiDeckTokenizer {
    * checked explicitly, as those will not be found in the sort order sequence.
    */
   @Override
-  public List<Part> generateParts(List<Card> cards, List<Card> jokers) {
-    List<Part> parts = new ArrayList<>();
+  public Set<Part> generateParts(List<Card> cards, List<Card> jokers) {
+    Set<Part> parts = new HashSet<>();
     cards.sort(COMPARE_BY_VALUE);
 
     Map<Face, Stack<Card>> qkaStacks = new HashMap<>();

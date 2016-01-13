@@ -1,10 +1,12 @@
 package rummy.tokenizer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import rummy.core.Card;
+import rummy.core.Card.Face;
 import rummy.core.Hand;
 import rummy.parts.Part;
 
@@ -20,21 +22,46 @@ public abstract class MultiDeckTokenizer implements PartsTokenizer {
   /**
    * Generate a list of parts using the given cards and jokers.
    */
-  protected abstract List<Part> generateParts(List<Card> cards, List<Card> jokers);
+  protected abstract Set<Part> generateParts(List<Card> cards, List<Card> jokers);
 
   /**
    * Tokenizes a hand of cards into an exhaustive list of Parts (eg rummys, sets, partial sets,
    * singles, etc).
    */
   @Override
-  public List<Part> tokenize(Hand hand) {
+  public Set<Part> tokenize(Hand hand, Face faceJoker) {
+    Set<Part> parts = new HashSet<>();
+
+    // Parts using face jokers
     List<Card> cards = new ArrayList<>();
     List<Card> jokers = new ArrayList<>();
-    splitIntoCardsAndJokers(hand, cards, jokers);
-    return generateParts(cards, jokers);
+    splitPictureAndFaceJokers(hand, cards, jokers, faceJoker);
+    parts.addAll(generateParts(cards, jokers));
+
+    // Parts without face jokers (they are used as real cards)
+    // TODO: possible improvement, only add NatRummy and Set parts
+    cards.clear();
+    jokers.clear();
+    splitOnlyPictureJokers(hand, cards, jokers);
+    parts.addAll(generateParts(cards, jokers));
+
+    // Return the combined unique parts
+    return parts;
   }
 
-  private static void splitIntoCardsAndJokers(Hand hand, List<Card> cards, List<Card> jokers) {
+  private static void splitPictureAndFaceJokers(
+      Hand hand, List<Card> cards, List<Card> jokers, Face faceJoker) {
+    for (Card card : hand.cards) {
+      if (card.isJoker() || (faceJoker != null && card.face == faceJoker)) {
+        jokers.add(card);
+      } else {
+        cards.add(card);
+      }
+    }
+  }
+
+  private static void splitOnlyPictureJokers(
+      Hand hand, List<Card> cards, List<Card> jokers) {
     for (Card card : hand.cards) {
       if (card.isJoker()) {
         jokers.add(card);
