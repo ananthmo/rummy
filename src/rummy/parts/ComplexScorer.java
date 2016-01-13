@@ -9,11 +9,17 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 
+import rummy.core.Card;
 import rummy.core.Card.Face;
 
 /**
- * Scorer which keeps track of state when scoring a part. For instance, weighs  the second natural
- * rummy less than the first.
+ * Scorer which keeps track of state when scoring a part. Includes the following rules:
+ * - Diminishing returns on part scores (eg first natural is 1000, second 500)
+ * - Disallows more than two sets
+ * - Disallows runs of five
+ * - Encourages first run of four, disallows remaining
+ * - Discourages duplicate single cards
+ * - Slightly discourages runs with Ace
  */
 public class ComplexScorer implements Scorer {
 
@@ -37,13 +43,16 @@ public class ComplexScorer implements Scorer {
 
   private static final int SINGLE_POINT = -5;
   private static final int JOKER_POINT = 100;
+  private static final int MULTIPLE_SINGLE_PENALTY = -50;
 
   private final Map<PartType, Integer> typeCounts;
+  private final Set<Integer> runValues;
   private boolean has4Run;
   private boolean hasNatural;
 
   public ComplexScorer() {
     this.typeCounts = new HashMap<>();
+    this.runValues = new HashSet<>();
     this.has4Run = false;
 
     for (PartType type : PartType.values()) {
@@ -53,11 +62,13 @@ public class ComplexScorer implements Scorer {
 
   private int getTypeScore(Part part) {
     PartType type = part.type;
-    if (type == PartType.SINGLE) {
-      return part.cards.get(0).face == Face.JOKER ? JOKER_POINT : SINGLE_POINT;
-    }
 
-    if (part.type == PartType.NATURAL_RUMMY) {
+    if (type == PartType.SINGLE) {
+      // If the same single card is being used elsewhere, discount this heavily
+      Card single = part.cards.get(0);
+      int penalty = runValues.contains(single.value) ? MULTIPLE_SINGLE_PENALTY : 0;
+      return penalty + (single.face == Face.JOKER ? JOKER_POINT : SINGLE_POINT);
+    } else if (part.type == PartType.NATURAL_RUMMY) {
       hasNatural = true;
     }
 
@@ -67,7 +78,7 @@ public class ComplexScorer implements Scorer {
     if (part.cards.size() == 4) {
       if (!has4Run) {
         has4Run = true;
-        multiplier = (type == PartType.SET || type == PartType.RUMMY && !hasNatural) ? 0.5 : 1.10;
+        multiplier = ((type == PartType.SET || type == PartType.RUMMY) && !hasNatural) ? 0.5 : 1.10;
       } else {
         multiplier = 0;
       }
@@ -92,6 +103,16 @@ public class ComplexScorer implements Scorer {
   }
 
   public int scoreParts(Set<Part> parts) {
+    // Set which cards belong to non-rummy parts
+    for (Part part : parts) {
+      for (Card card : part.cards) {
+        if (part.type != PartType.SINGLE && !runValues.contains(card.value)) {
+          runValues.add(card.value);
+        }
+      }
+    }
+
+    // Tally the score for each part
     int score = 0;
     for (Part part : parts) {
       score += getTypeScore(part);

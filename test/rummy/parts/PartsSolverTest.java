@@ -2,6 +2,7 @@ package rummy.parts;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,6 +124,11 @@ public class PartsSolverTest {
     checkSolution("A♣ 2♣ 3♣ 8♦ 9♦ jk5 Q♥ Q♦ Q♣ 10♥ 8♠ 10♥ A♦ KC", true);
   }
 
+  @Test
+  public void testDiscards() {
+    checkDiscard("8H 8S 8C 4H 5H 6H 9D 10D 5C 5D 6C AD QH 8H", Card.build(Face.EIGHT, Suit.HEARTS));
+  }
+
   private static void checkWin(String in, boolean extraCard, Face faceJoker) {
     System.out.println("checkWin");
     Hand hand = toHand(in);
@@ -146,6 +152,18 @@ public class PartsSolverTest {
     System.out.println(solution.parts);
     assertTrue(solution.score > -100);
     assertTrue(solution.freeCards.size() == 1);
+  }
+
+  private static void checkDiscard(String in, Card discard) {
+    System.out.println("checkSolution");
+    Hand hand = toHand(in);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
+    System.out.println(parts);
+    Solution solution = new PartsSolver(parts, true).findBestHand();
+    System.out.println(solution.parts);
+    assertTrue(solution.score > -100);
+    assertTrue(solution.freeCards.size() == 1);
+    assertEquals(discard.value, solution.freeCards.get(0).value);
   }
 
   private static Hand toHand(String in) {

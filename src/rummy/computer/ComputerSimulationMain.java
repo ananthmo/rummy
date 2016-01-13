@@ -18,7 +18,7 @@ public class ComputerSimulationMain {
     int numDecks = 2;
     int numJokers = 4;
 
-    Deck deck = new Deck(numDecks, numJokers);
+    Deck deck = new Deck(numDecks, numJokers, 14);
     deck.shuffle();
     Face faceJoker = deck.draw().face;
     System.out.println("Face joker: " + faceJoker);
