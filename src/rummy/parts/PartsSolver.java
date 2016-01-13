@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import rummy.core.Card;
 import rummy.core.Card.Face;
 
@@ -24,8 +27,7 @@ public class PartsSolver {
   private static final int DEFAULT_HAND_SIZE = 13;
 
   // See description of #initializeBitMaps() to see how these are used.
-  private final Map<Integer, Part> bitIdxToPart;
-  private final Map<Part, Integer> partToBitIdx;
+  private final BiMap<Integer, Part> bitIdxToPart;
   private final Map<Part, BitSet> partToBitSet;
 
   private List<Part> parts;
@@ -51,8 +53,7 @@ public class PartsSolver {
     this.parts.addAll(parts);
     this.handSize = handSize;
     this.extraCard = extraCard;
-    this.bitIdxToPart = new HashMap<>();
-    this.partToBitIdx = new HashMap<>();
+    this.bitIdxToPart = HashBiMap.create();
     this.partToBitSet = new HashMap<>();
 
     preparePartsForSearch();
@@ -91,7 +92,6 @@ public class PartsSolver {
     int nextBitIdx = 1;
     for (Part part : parts) {
       bitIdxToPart.put(nextBitIdx, part);
-      partToBitIdx.put(part, nextBitIdx);
       nextBitIdx += 1;
     }
 
@@ -103,7 +103,7 @@ public class PartsSolver {
           cardToBitSet.put(card, new BitSet());
         }
         BitSet cardBitSet = cardToBitSet.get(card);
-        int bitIdx = partToBitIdx.get(part);
+        int bitIdx = bitIdxToPart.inverse().get(part);
         cardBitSet.set(bitIdx);
       }
     }
@@ -116,7 +116,6 @@ public class PartsSolver {
         bitSet.or(cardBitSet);
       }
       partToBitSet.put(part, bitSet);
-      //System.out.println(partToBitIdx.get(part) + " ->" + part + " : " + partToBitSet.get(part));
     }
   }
 
@@ -157,7 +156,7 @@ public class PartsSolver {
     BitSet availableParts = new BitSet();
     Set<Card> allCards = new HashSet<>();
     for (Part part : parts) {
-      availableParts.set(partToBitIdx.get(part));
+      availableParts.set(bitIdxToPart.inverse().get(part));
       allCards.addAll(part.cards);
     }
 
@@ -180,7 +179,6 @@ public class PartsSolver {
       Set<Card> availableCards,
       Set<Card> usedCards,
       Solution best) {
-    //System.out.println(runningParts + "     " + availableCards + " " + availableParts);
     if (best.isWinning) {
       // Found a winning solution, end the search.
       return;

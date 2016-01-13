@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableMap;
+
 import rummy.core.Card.Face;
 
 /**
@@ -17,14 +19,14 @@ public class ComplexScorer implements Scorer {
 
   // The points for each type, with diminishing points with more types. Eg the first natural rummy
   // is worth 1000, second worth 500, third and more worth 500.
-  private static final Map<PartType, int[]> POINT_MAP = new HashMap<>();
-  static {
-    POINT_MAP.put(PartType.NATURAL_RUMMY, new int[] {1000, 500, 500});
-    POINT_MAP.put(PartType.RUMMY, new int[] {300, 300, 300});
-    POINT_MAP.put(PartType.SET, new int[] {200, 100, -1000});
-    POINT_MAP.put(PartType.PARTIAL_RUMMY, new int[] {75, 75, 75});
-    POINT_MAP.put(PartType.PARTIAL_SET, new int[] {50, 50, 25});
-  }
+  private static final Map<PartType, int[]> POINT_MAP =
+      new ImmutableMap.Builder<PartType, int[]>()
+          .put(PartType.NATURAL_RUMMY, new int[] {1000, 500, 500})
+          .put(PartType.RUMMY, new int[] {300, 300, 300})
+          .put(PartType.SET, new int[] {200, 100, -1000})
+          .put(PartType.PARTIAL_RUMMY, new int[] {75, 75, 75})
+          .put(PartType.PARTIAL_SET, new int[] {50, 50, 25})
+          .build();
 
   // Update counts of these types together as one atomic group.
   private static final Map<PartType, Set<PartType>> GROUPED_TYPES = new HashMap<>();
@@ -38,6 +40,7 @@ public class ComplexScorer implements Scorer {
 
   private final Map<PartType, Integer> typeCounts;
   private boolean has4Run;
+  private boolean hasNatural;
 
   public ComplexScorer() {
     this.typeCounts = new HashMap<>();
@@ -54,12 +57,17 @@ public class ComplexScorer implements Scorer {
       return part.cards.get(0).face == Face.JOKER ? JOKER_POINT : SINGLE_POINT;
     }
 
+    if (part.type == PartType.NATURAL_RUMMY) {
+      hasNatural = true;
+    }
+
     // Use a multiplier to encourage one run of 4, invalidate multiple runs of 4 and any runs of 5.
+    // Discourage a set/rummy of 4 without a natural.
     double multiplier = 1;
     if (part.cards.size() == 4) {
       if (!has4Run) {
         has4Run = true;
-        multiplier = 1.1;
+        multiplier = (type == PartType.SET || type == PartType.RUMMY && !hasNatural) ? 0.5 : 1.10;
       } else {
         multiplier = 0;
       }

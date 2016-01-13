@@ -159,10 +159,10 @@ public class RummyTokenizer extends MultiDeckTokenizer {
     List<Set<Card>> sets2Head = cardSets2.subList(0, Math.min(sets2Size, 2));
 
     // Create a new card set with jokers in the middle
-    List<Set<Card>> cardSetsWithJoker = new ArrayList<>();
-    cardSetsWithJoker.addAll(sets1Tail);
     List<Set<Card>> jokerSet = new ArrayList<>();
     jokerSet.add(new LinkedHashSet<>(jokers));
+    List<Set<Card>> cardSetsWithJoker = new ArrayList<>();
+    cardSetsWithJoker.addAll(sets1Tail);
     cardSetsWithJoker.addAll(jokerSet);
     cardSetsWithJoker.addAll(sets2Head);
 
