@@ -14,8 +14,8 @@ public class ComputerSimulationMain {
 
   public static void main(String args[]) {
     int numComputers = 1;
-    int numDecks = 2;
-    int numJokers = 4;
+    int numDecks = 1;
+    int numJokers = 2;
 
     Deck deck = new Deck(numDecks, numJokers);
     deck.shuffle();
@@ -26,6 +26,7 @@ public class ComputerSimulationMain {
       computer.drawNewHand(deck);
       computers.add(computer);
     }
+    // TODO: add AI support for drawing a face joker
 
     Card top = deck.draw();
     int turn = 1;

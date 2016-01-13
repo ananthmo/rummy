@@ -2,7 +2,7 @@ package rummy.tokenizer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,7 +47,7 @@ public class SetTokenizer extends MultiDeckTokenizer {
       if (prev != null && card.value == prev.value) {
         runCardSets.get(runCardSets.size() - 1).add(card);
       } else {
-        runCardSets.add(new HashSet<>());
+        runCardSets.add(new LinkedHashSet<>());
         runCardSets.get(runCardSets.size() - 1).add(card);
       }
 

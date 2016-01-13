@@ -3,7 +3,7 @@ package rummy.tokenizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,6 +67,7 @@ public class RummyTokenizer extends MultiDeckTokenizer {
       }
 
       // Check for wrapping Q-K-A runs
+      // TODO: JACK and joker support
       if (card.face == Face.ACE || card.face == Face.KING || card.face == Face.QUEEN) {
         qkaStacks.get(card.face).add(card);
         if (!qkaStacks.get(Face.ACE).isEmpty()
@@ -85,7 +86,7 @@ public class RummyTokenizer extends MultiDeckTokenizer {
       if (prev != null && card.value == prev.value && !cardSets.isEmpty()) {
         cardSets.get(cardSets.size() - 1).add(card);
       } else {
-        cardSets.add(new HashSet<>());
+        cardSets.add(new LinkedHashSet<>());
         cardSets.get(cardSets.size() - 1).add(card);
       }
 
@@ -160,7 +161,7 @@ public class RummyTokenizer extends MultiDeckTokenizer {
     List<Set<Card>> cardSetsWithJoker = new ArrayList<>();
     cardSetsWithJoker.addAll(sets1Tail);
     List<Set<Card>> jokerSet = new ArrayList<>();
-    jokerSet.add(new HashSet<>(jokers));
+    jokerSet.add(new LinkedHashSet<>(jokers));
     cardSetsWithJoker.addAll(jokerSet);
     cardSetsWithJoker.addAll(sets2Head);
 
