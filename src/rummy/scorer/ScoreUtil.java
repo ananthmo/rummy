@@ -1,8 +1,10 @@
-package rummy.parts;
+package rummy.scorer;
 
 import java.util.Collection;
 
 import rummy.core.Card;
+import rummy.parts.Part;
+import rummy.parts.PartType;
 
 public final class ScoreUtil {
 

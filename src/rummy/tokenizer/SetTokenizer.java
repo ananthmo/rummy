@@ -22,13 +22,21 @@ public class SetTokenizer extends MultiDeckTokenizer {
     }
   };
 
+  private static final Comparator<Card> COMPARE_BY_SUIT = new Comparator<Card>() {
+    @Override
+    public int compare(Card c1, Card c2) {
+      return c1.suit.ordinal() - c2.suit.ordinal();
+    }
+  };
+
   /**
-   * Finds the set-related part types of this hand of cards. Sorts the cards by face, then iterates
-   * through, keeping a running list of cards with same face value. Those are then converted to
-   * set parts.
+   * Finds the set-related part types of this hand of cards. Sorts the cards by face
+   * (suit secondary), then iterates through, keeping a running list of cards with same face value.
+   * Those are then converted to set parts.
    */
   @Override
   public Set<Part> generateParts(List<Card> cards, List<Card> jokers) {
+    cards.sort(COMPARE_BY_SUIT);
     cards.sort(COMPARE_BY_FACE);
     Set<Part> parts = new HashSet<>();
     List<Set<Card>> runCardSets = new ArrayList<>();

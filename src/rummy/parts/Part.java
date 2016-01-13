@@ -8,16 +8,6 @@ import java.util.Objects;
 import rummy.core.Card;
 import rummy.core.Card.Face;
 
-/** The possible ways of breaking down a rummy hand. */
-enum PartType {
-  NATURAL_RUMMY, // Eg 3H-4H-5H
-  RUMMY,         // Eg 3H-4H-jk, 3H-4H-jk-jk
-  SET,           // Eg 4H-4C-4D, 4H-jk-4D
-  PARTIAL_RUMMY, // Eg 4H-5H,
-  PARTIAL_SET,   // Eg 4H-4D,
-  SINGLE,        // Eg 4H
-}
-
 /**
  * A part (or token) represents a unit that a hand breaks down to. For instance, a 3H in a hand
  * could fall into a rummy parts 3H-4H-5H, and/or a partial set 3H-3C.

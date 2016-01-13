@@ -15,6 +15,7 @@ import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
 import rummy.core.Hand;
 import rummy.parts.PartsSolver.Solution;
+import rummy.scorer.ScorerFactory;
 import rummy.tokenizer.AggregateTokenizer;
 
 public class PartsSolverTest {
@@ -42,7 +43,7 @@ public class PartsSolverTest {
     System.out.println("numParts:" + parts.size());
     assertTrue(parts.size() > 0);
 
-    PartsSolver solver = new PartsSolver(13, parts, true);
+    PartsSolver solver = new PartsSolver(13, parts, true, ScorerFactory.COMPLEX);
     Solution solution = solver.findBestHand();
     assertNotNull(solution.parts);
     System.out.println("solution");
@@ -64,28 +65,6 @@ public class PartsSolverTest {
 
     Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println("qka parts:" + parts.toString());
-  }
-
-  @Test
-  public void testSparseHand() {
-    Hand hand = new Hand(
-      Card.build(Face.TWO, Suit.HEARTS),
-      Card.build(Face.THREE, Suit.HEARTS),
-      Card.build(Face.FOUR, Suit.HEARTS),
-      Card.build(Face.FOUR, Suit.SPADES),
-      Card.build(Face.FIVE, Suit.HEARTS),
-      Card.build(Face.FIVE, Suit.SPADES),
-      Card.build(Face.SIX, Suit.HEARTS)
-    );
-
-    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
-    System.out.println("numParts:" + parts.size());
-    assertTrue(parts.size() > 0);
-
-    Solution solution = new PartsSolver(7, parts, false).findBestHand();
-    //assertNotNull(solution.parts);
-    System.out.println("solution");
-    System.out.println(solution.parts);
   }
 
   @Test
@@ -127,6 +106,13 @@ public class PartsSolverTest {
   @Test
   public void testDiscards() {
     checkDiscard("8H 8S 8C 4H 5H 6H 9D 10D 5C 5D 6C AD QH 8H", Card.build(Face.EIGHT, Suit.HEARTS));
+    checkDiscard("3H 4H 5H 7S 7H 7C 7D JS QS KS 6C 5C 4H 4C", Card.build(Face.FOUR, Suit.HEARTS));
+  }
+
+  @Test
+  public void testNotFullHand() {
+    checkNotFull("2♠ 3♠ 4♠ 5♠ J♠ J♣ A♠ 7♥ 6♣ 10♣ 3♣ 10♣ jk");
+    checkNotFull("4♠ 5♠ 6♠ 7♥ 7♦ 7♣ A♥ A♦ J♦ 4♣ 5♥ K♠ jk");
   }
 
   private static void checkWin(String in, boolean extraCard, Face faceJoker) {
@@ -134,7 +120,7 @@ public class PartsSolverTest {
     Hand hand = toHand(in);
     Set<Part> parts = new AggregateTokenizer().tokenize(hand, faceJoker);
     System.out.println(parts);
-    Solution solution = new PartsSolver(parts, extraCard).findBestHand();
+    Solution solution = new PartsSolver(parts, extraCard, ScorerFactory.COMPLEX).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.isWinning);
   }
@@ -148,7 +134,7 @@ public class PartsSolverTest {
     Hand hand = toHand(in);
     Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println(parts);
-    Solution solution = new PartsSolver(parts, extraCard).findBestHand();
+    Solution solution = new PartsSolver(parts, extraCard, ScorerFactory.COMPLEX).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.score > -100);
     assertTrue(solution.freeCards.size() == 1);
@@ -159,11 +145,22 @@ public class PartsSolverTest {
     Hand hand = toHand(in);
     Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
     System.out.println(parts);
-    Solution solution = new PartsSolver(parts, true).findBestHand();
+    Solution solution = new PartsSolver(parts, true, ScorerFactory.COMPLEX).findBestHand();
     System.out.println(solution.parts);
     assertTrue(solution.score > -100);
     assertTrue(solution.freeCards.size() == 1);
+    System.out.println("Discarded" + solution.freeCards.get(0));
     assertEquals(discard.value, solution.freeCards.get(0).value);
+  }
+
+  private static void checkNotFull(String in) {
+    System.out.println("checkSolution");
+    Hand hand = toHand(in);
+    Set<Part> parts = new AggregateTokenizer().tokenize(hand, null);
+    System.out.println(parts);
+    Solution solution = new PartsSolver(parts, false, ScorerFactory.COMPLEX).findBestHand();
+    System.out.println(solution.parts);
+    assertTrue(solution.points != 80);
   }
 
   private static Hand toHand(String in) {

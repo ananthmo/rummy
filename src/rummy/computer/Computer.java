@@ -9,7 +9,8 @@ import rummy.core.Hand;
 import rummy.parts.Part;
 import rummy.parts.PartsSolver;
 import rummy.parts.PartsSolver.Solution;
-import rummy.parts.ScoreUtil;
+import rummy.scorer.ScoreUtil;
+import rummy.scorer.ScorerFactory;
 import rummy.tokenizer.AggregateTokenizer;
 import rummy.tokenizer.PartsTokenizer;
 
@@ -23,9 +24,11 @@ public class Computer {
   int currentHandScore = -99999;
   int currentPoints = ScoreUtil.FULL_HAND_POINTS;
   final Face faceJoker;
+  final ScorerFactory scorerFactory;
 
-  public Computer(Face faceJoker) {
+  public Computer(Face faceJoker, ScorerFactory scorerFactory) {
     this.faceJoker = faceJoker;
+    this.scorerFactory = scorerFactory;
   }
 
   public void drawNewHand(Deck deck) {
@@ -84,7 +87,7 @@ public class Computer {
   public Solution computeScore(Hand hand, boolean extraCard) {
     PartsTokenizer tokenizer = new AggregateTokenizer();
     Set<Part> parts = tokenizer.tokenize(hand, faceJoker);
-    PartsSolver solver = new PartsSolver(parts, extraCard);
+    PartsSolver solver = new PartsSolver(parts, extraCard, scorerFactory);
     return solver.findBestHand();
   }
 }

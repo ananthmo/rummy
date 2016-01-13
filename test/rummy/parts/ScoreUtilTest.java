@@ -11,6 +11,7 @@ import org.junit.Test;
 import rummy.core.Card;
 import rummy.core.Card.Face;
 import rummy.core.Card.Suit;
+import rummy.scorer.ScoreUtil;
 
 /**
  * Unit tests for {@link ScoreUtil}.

@@ -1,11 +1,19 @@
-package rummy.parts;
+package rummy.scorer;
 
 import java.util.Set;
 
+import rummy.parts.Part;
+
 /**
- * Scorer that looks at each part independently.
+ * State-less scorer that looks at each part independently.
  */
 public class SimpleScorer implements Scorer {
+
+  public static final SimpleScorer INSTANCE = new SimpleScorer();
+
+  private SimpleScorer() {
+    // Singleton, can't instantiate
+  }
 
   private int scorePart(Part part) {
     switch (part.type) {

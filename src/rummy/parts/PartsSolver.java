@@ -15,6 +15,8 @@ import com.google.common.collect.HashBiMap;
 
 import rummy.core.Card;
 import rummy.core.Card.Face;
+import rummy.scorer.ScoreUtil;
+import rummy.scorer.ScorerFactory;
 
 /**
  * Combines a list of part tokens (eg rummys, sets, partial rummys, single cards, etc) into a hand
@@ -33,6 +35,7 @@ public class PartsSolver {
   private List<Part> parts;
   private final int handSize;
   private final boolean extraCard;
+  private final ScorerFactory scorerFactory;
 
   // Helper variable allocated once rather than in the recursive search method, to prevent GC
   // overhead.
@@ -48,11 +51,12 @@ public class PartsSolver {
   };
 
   // Allows for a different handSize just for testing purposes
-  PartsSolver(int handSize, Set<Part> parts, boolean extraCard) {
+  PartsSolver(int handSize, Set<Part> parts, boolean extraCard, ScorerFactory scorerFactory) {
     this.parts = new ArrayList<>();
     this.parts.addAll(parts);
     this.handSize = handSize;
     this.extraCard = extraCard;
+    this.scorerFactory = scorerFactory;
     this.bitIdxToPart = HashBiMap.create();
     this.partToBitSet = new HashMap<>();
 
@@ -60,8 +64,8 @@ public class PartsSolver {
     initializeBitMaps();
   }
 
-  public PartsSolver(Set<Part> parts, boolean extraCard) {
-    this(DEFAULT_HAND_SIZE, parts, extraCard);
+  public PartsSolver(Set<Part> parts, boolean extraCard, ScorerFactory scorerFactory) {
+    this(DEFAULT_HAND_SIZE, parts, extraCard, scorerFactory);
   }
 
   private void preparePartsForSearch() {
@@ -187,11 +191,14 @@ public class PartsSolver {
     searchIterations++;
     if (usedCards.size() == handSize && availableCards.size() == (extraCard ? 1 : 0)) {
       // Found a solution, record it if its the best one so far
+      // System.out.println(runningParts);
       int score = computeScore(runningParts);
-      if (score > best.score) {
+      int points = ScoreUtil.calculatePoints(runningParts);
+      if (points <= best.points && score > best.score) {
+      //if (points <= best.points) {
         best.parts = new ArrayList<Part>(runningParts);
         best.score = score;
-        best.points = ScoreUtil.calculatePoints(runningParts);
+        best.points = points;
         best.isWinning = best.points == 0;
         best.freeCards = new ArrayList<Card>(availableCards);
       }
@@ -240,7 +247,7 @@ public class PartsSolver {
   }
 
   private int computeScore(Set<Part> parts) {
-    return new ComplexScorer().scoreParts(parts);
+    return scorerFactory.get().scoreParts(parts);
   }
 
   /**

@@ -6,6 +6,7 @@ import java.util.List;
 import rummy.computer.Computer.PickupResult;
 import rummy.core.Card;
 import rummy.core.Card.Face;
+import rummy.scorer.ScorerFactory;
 import rummy.core.Deck;
 
 /**
@@ -14,18 +15,19 @@ import rummy.core.Deck;
 public class ComputerSimulationMain {
 
   public static void main(String args[]) {
-    int numComputers = 3;
+    int numComputers = 2;
     int numDecks = 2;
     int numJokers = 4;
 
-    Deck deck = new Deck(numDecks, numJokers, 14);
+    Deck deck = new Deck(numDecks, numJokers);
     deck.shuffle();
     Face faceJoker = deck.draw().face;
     System.out.println("Face joker: " + faceJoker);
 
     List<Computer> computers = new ArrayList<>(numComputers);
     for (int i = 0; i < numComputers; i++) {
-      Computer computer = new Computer(faceJoker);
+      Computer computer =
+          new Computer(faceJoker, i == 0 ? ScorerFactory.COMPLEX : ScorerFactory.SIMPLE);
       computer.drawNewHand(deck);
       computers.add(computer);
     }

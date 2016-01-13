@@ -1,4 +1,4 @@
-package rummy.parts;
+package rummy.scorer;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -11,6 +11,8 @@ import com.google.common.collect.ImmutableMap;
 
 import rummy.core.Card;
 import rummy.core.Card.Face;
+import rummy.parts.Part;
+import rummy.parts.PartType;
 
 /**
  * Scorer which keeps track of state when scoring a part. Includes the following rules:
@@ -20,6 +22,7 @@ import rummy.core.Card.Face;
  * - Encourages first run of four, disallows remaining
  * - Discourages duplicate single cards
  * - Slightly discourages runs with Ace
+ * TODO: weigh rummy with middle jokers less
  */
 public class ComplexScorer implements Scorer {
 
@@ -43,7 +46,7 @@ public class ComplexScorer implements Scorer {
 
   private static final int SINGLE_POINT = -5;
   private static final int JOKER_POINT = 100;
-  private static final int MULTIPLE_SINGLE_PENALTY = -50;
+  private static final int MULTIPLE_SINGLE_PENALTY = -10;
 
   private final Map<PartType, Integer> typeCounts;
   private final Set<Integer> runValues;
@@ -75,20 +78,21 @@ public class ComplexScorer implements Scorer {
     // Use a multiplier to encourage one run of 4, invalidate multiple runs of 4 and any runs of 5.
     // Discourage a set/rummy of 4 without a natural.
     double multiplier = 1;
-    if (part.cards.size() == 4) {
+    if (type == PartType.SET && !hasNatural) {
+      multiplier = 0.10;
+    } else if (part.cards.size() == 4) {
       if (!has4Run) {
         has4Run = true;
         multiplier = ((type == PartType.SET || type == PartType.RUMMY) && !hasNatural) ? 0.5 : 1.10;
       } else {
         multiplier = 0;
       }
-    }
-    if (part.cards.size() == 5) {
+    } else if (part.cards.size() == 5) {
       multiplier = 0;
     }
 
     // Discount ace rummys
-    if (type == PartType.PARTIAL_RUMMY || type == PartType.RUMMY && part.containsAce) {
+    if ((type == PartType.PARTIAL_RUMMY || type == PartType.RUMMY) && part.containsAce) {
       multiplier *= 0.50;
     }
 
